@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFit Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateX(5px);
+        }
+        
+        .sidebar-item.active {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            border-right: 4px solid #fca5a5;
+        }
+        
+        .card-gradient {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border: 1px solid #4b5563;
+        }
+        
+        .alert-gradient {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+        
+        .pending-item {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border-left: 4px solid #dc2626;
+        }
+        
+        .metric-number {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed left-0 top-0 h-full w-64 bg-gray-800 shadow-2xl z-50">
+        <!-- Logo -->
+        <div class="p-6 border-b border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-dumbbell text-white text-lg"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">TechFit</h1>
+            </div>
+        </div>
+        
+        <!-- Menu Items -->
+        <nav class="mt-6">
+            <div class="sidebar-item active px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'inicio')">
+                <i class="fas fa-home text-lg w-5"></i>
+                <span class="font-medium">Início</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'horarios')">
+                <i class="fas fa-clock text-lg w-5"></i>
+                <span class="font-medium">Horários</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'agendamentos')">
+                <i class="fas fa-calendar-check text-lg w-5"></i>
+                <span class="font-medium">Agendamentos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'treinos')">
+                <i class="fas fa-dumbbell text-lg w-5"></i>
+                <span class="font-medium">Meus Treinos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'agenda')">
+                <i class="fas fa-calendar text-lg w-5"></i>
+                <span class="font-medium">Agenda</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'perfil')">
+                <i class="fas fa-user text-lg w-5"></i>
+                <span class="font-medium">Perfil</span>
+            </div>
+        </nav>
+        
+        <!-- User Profile -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+                <div>
+                    <p class="font-medium">João Silva</p>
+                    <p class="text-sm text-gray-400">Membro Premium</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-gray-800 shadow-lg p-6 border-b border-gray-700">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-bold" id="page-title">Dashboard</h2>
+                    <p class="text-gray-400 mt-1">Bem-vindo de volta, João!</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <i class="fas fa-bell text-xl text-gray-400 cursor-pointer hover:text-red-500 transition-colors"></i>
+                        <span class="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    </div>
+                    <button class="action-btn px-4 py-2 rounded-lg text-white font-medium">
+                        <i class="fas fa-plus mr-2"></i>Novo Agendamento
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <main class="p-6">
+            <!-- Início Section -->
+            <div id="inicio" class="content-section active">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card-gradient rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Treinos Este Mês</p>
+                                <p class="text-3xl font-bold metric-number">24</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dumbbell text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-gradient rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Próximo Treino</p>
+                                <p class="text-xl font-bold text-white">Hoje 18:00</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-gradient rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Calorias Queimadas</p>
+                                <p class="text-3xl font-bold metric-number">2,450</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-fire text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-gradient rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Sequência</p>
+                                <p class="text-3xl font-bold metric-number">7</p>
+                                <p class="text-sm text-gray-400">dias</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-trophy text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions & Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Quick Actions -->
+                    <div class="card-gradient rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-4">Ações Rápidas</h3>
+                        <div class="space-y-3">
+                            <button class="w-full action-btn p-4 rounded-lg text-left flex items-center space-x-3">
+                                <i class="fas fa-calendar-plus"></i>
+                                <span>Agendar Treino</span>
+                            </button>
+                            <button class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-left flex items-center space-x-3 transition-colors">
+                                <i class="fas fa-list"></i>
+                                <span>Ver Plano de Treino</span>
+                            </button>
+                            <button class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-left flex items-center space-x-3 transition-colors">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Acompanhar Progresso</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card-gradient rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-4">Atividade Recente</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+                                <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Treino de Peito concluído</p>
+                                    <p class="text-sm text-gray-400">Há 2 horas</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-calendar text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Treino agendado para amanhã</p>
+                                    <p class="text-sm text-gray-400">Há 1 dia</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+                                <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-trophy text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Meta semanal atingida!</p>
+                                    <p class="text-sm text-gray-400">Há 2 dias</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horários Section -->
+            <div id="horarios" class="content-section">
+                <div class="card-gradient rounded-xl p-6">
+                    <h3 class="text-2xl font-bold mb-6">Horários Disponíveis</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-gray-700 p-4 rounded-lg border-l-4 border-green-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">06:00 - 07:00</p>
+                                    <p class="text-sm text-gray-400">Disponível</p>
+                                </div>
+                                <button class="action-btn px-3 py-1 rounded text-sm">Agendar</button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg border-l-4 border-red-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">18:00 - 19:00</p>
+                                    <p class="text-sm text-gray-400">Ocupado</p>
+                                </div>
+                                <button class="bg-gray-600 px-3 py-1 rounded text-sm cursor-not-allowed">Indisponível</button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg border-l-4 border-green-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">19:00 - 20:00</p>
+                                    <p class="text-sm text-gray-400">Disponível</p>
+                                </div>
+                                <button class="action-btn px-3 py-1 rounded text-sm">Agendar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agendamentos Section -->
+            <div id="agendamentos" class="content-section">
+                <div class="card-gradient rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold">Meus Agendamentos</h3>
+                        <button class="action-btn px-4 py-2 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Novo Agendamento
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="pending-item p-4 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">Treino de Peito e Tríceps</p>
+                                    <p class="text-gray-400">Hoje, 18:00 - 19:00</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm transition-colors">Confirmar</button>
+                                    <button class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition-colors">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pending-item p-4 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">Treino de Costas e Bíceps</p>
+                                    <p class="text-gray-400">Amanhã, 07:00 - 08:00</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm transition-colors">Confirmar</button>
+                                    <button class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition-colors">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treinos Section -->
+            <div id="treinos" class="content-section">
+                <div class="card-gradient rounded-xl p-6">
+                    <h3 class="text-2xl font-bold mb-6">Meus Planos de Treino</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-700 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold mb-3">Treino A - Peito e Tríceps</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>• Supino Reto - 4x12</li>
+                                <li>• Supino Inclinado - 3x10</li>
+                                <li>• Crucifixo - 3x12</li>
+                                <li>• Tríceps Testa - 3x12</li>
+                                <li>• Tríceps Corda - 3x15</li>
+                            </ul>
+                            <button class="action-btn w-full mt-4 py-2 rounded-lg">Iniciar Treino</button>
+                        </div>
+                        <div class="bg-gray-700 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold mb-3">Treino B - Costas e Bíceps</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>• Puxada Frontal - 4x12</li>
+                                <li>• Remada Curvada - 3x10</li>
+                                <li>• Pullover - 3x12</li>
+                                <li>• Rosca Direta - 3x12</li>
+                                <li>• Rosca Martelo - 3x15</li>
+                            </ul>
+                            <button class="action-btn w-full mt-4 py-2 rounded-lg">Iniciar Treino</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agenda Section -->
+            <div id="agenda" class="content-section">
+                <div class="card-gradient rounded-xl p-6">
+                    <h3 class="text-2xl font-bold mb-6">Calendário de Treinos</h3>
+                    <div class="grid grid-cols-7 gap-2 mb-4">
+                        <div class="text-center font-bold p-2">Dom</div>
+                        <div class="text-center font-bold p-2">Seg</div>
+                        <div class="text-center font-bold p-2">Ter</div>
+                        <div class="text-center font-bold p-2">Qua</div>
+                        <div class="text-center font-bold p-2">Qui</div>
+                        <div class="text-center font-bold p-2">Sex</div>
+                        <div class="text-center font-bold p-2">Sáb</div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2">
+                        <div class="p-3 text-center text-gray-500">29</div>
+                        <div class="p-3 text-center text-gray-500">30</div>
+                        <div class="p-3 text-center text-gray-500">31</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">1</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">2</div>
+                        <div class="p-3 text-center bg-red-600 rounded font-bold">3</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">4</div>
+                        <div class="p-3 text-center bg-red-600 rounded font-bold">5</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">6</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">7</div>
+                        <div class="p-3 text-center bg-red-600 rounded font-bold">8</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">9</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">10</div>
+                        <div class="p-3 text-center bg-gray-700 rounded">11</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perfil Section -->
+            <div id="perfil" class="content-section">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card-gradient rounded-xl p-6">
+                        <h3 class="text-2xl font-bold mb-6">Informações Pessoais</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-400 mb-2">Nome Completo</label>
+                                <input type="text" value="João Silva" class="w-full bg-gray-700 p-3 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-2">Email</label>
+                                <input type="email" value="joao@email.com" class="w-full bg-gray-700 p-3 rounded-lg text-white">
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-2">Telefone</label>
+                                <input type="tel" value="(11) 99999-9999" class="w-full bg-gray-700 p-3 rounded-lg text-white">
+                            </div>
+                            <button class="action-btn w-full py-3 rounded-lg">Salvar Alterações</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-gradient rounded-xl p-6">
+                        <h3 class="text-2xl font-bold mb-6">Estatísticas</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Membro desde:</span>
+                                <span class="font-bold">Janeiro 2024</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Total de treinos:</span>
+                                <span class="font-bold">156</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Frequência semanal:</span>
+                                <span class="font-bold">4.2 dias</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Plano atual:</span>
+                                <span class="font-bold text-red-500">Premium</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function setActiveMenu(element, sectionId) {
+            // Remove active class from all sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            element.classList.add('active');
+            
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'inicio': 'Dashboard',
+                'horarios': 'Horários Disponíveis',
+                'agendamentos': 'Meus Agendamentos',
+                'treinos': 'Meus Treinos',
+                'agenda': 'Agenda de Treinos',
+                'perfil': 'Meu Perfil'
+            };
+            
+            document.getElementById('page-title').textContent = titles[sectionId] || 'Dashboard';
+        }
+
+        // Add click handlers for action buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Schedule workout buttons
+            document.querySelectorAll('button:contains("Agendar")').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('Funcionalidade de agendamento será implementada em breve!');
+                });
+            });
+            
+            // Start workout buttons
+            document.querySelectorAll('button:contains("Iniciar Treino")').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('Iniciando treino... Boa sorte!');
+                });
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d0ca9f71f4a5be',t:'MTc1NzUyNjg3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

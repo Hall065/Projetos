@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFit Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateX(5px);
+        }
+        
+        .sidebar-item.active {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            border-right: 4px solid #fca5a5;
+        }
+        
+        .card-gradient {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border: 1px solid #4b5563;
+        }
+        
+        .alert-gradient {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+        
+        .pending-item {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border-left: 4px solid #dc2626;
+        }
+        
+        .metric-number {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed left-0 top-0 h-full w-64 bg-gray-800 shadow-2xl z-50">
+        <!-- Logo -->
+        <div class="p-6 border-b border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-dumbbell text-white text-lg"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">TechFit</h1>
+            </div>
+        </div>
+        
+        <!-- Menu Items -->
+        <nav class="mt-6">
+            <div class="sidebar-item active px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'inicio')">
+                <i class="fas fa-home text-lg w-5"></i>
+                <span class="font-medium">Início</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'horarios')">
+                <i class="fas fa-clock text-lg w-5"></i>
+                <span class="font-medium">Horários</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'agendamentos')">
+                <i class="fas fa-calendar-check text-lg w-5"></i>
+                <span class="font-medium">Agendamentos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'treinos')">
+                <i class="fas fa-dumbbell text-lg w-5"></i>
+                <span class="font-medium">Meus Treinos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'agenda')">
+                <i class="fas fa-calendar text-lg w-5"></i>
+                <span class="font-medium">Minha Agenda</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'comprar-planos')">
+                <i class="fas fa-shopping-cart text-lg w-5"></i>
+                <span class="font-medium">Comprar Planos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'carteira')">
+                <i class="fas fa-wallet text-lg w-5"></i>
+                <span class="font-medium">Minha Carteira</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'meus-planos')">
+                <i class="fas fa-list text-lg w-5"></i>
+                <span class="font-medium">Meus Planos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'pagamentos')">
+                <i class="fas fa-credit-card text-lg w-5"></i>
+                <span class="font-medium">Pagamentos</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'pendencias')">
+                <i class="fas fa-exclamation-triangle text-lg w-5"></i>
+                <span class="font-medium">Pendências</span>
+                <span class="bg-red-600 text-xs px-2 py-1 rounded-full ml-auto">2</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'avaliacao')">
+                <i class="fas fa-chart-line text-lg w-5"></i>
+                <span class="font-medium">Avaliação Física</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3" onclick="setActiveMenu(this, 'cadastro')">
+                <i class="fas fa-user text-lg w-5"></i>
+                <span class="font-medium">Meu Cadastro</span>
+            </div>
+            <div class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3 mt-8 border-t border-gray-700 pt-6" onclick="logout()">
+                <i class="fas fa-sign-out-alt text-lg w-5"></i>
+                <span class="font-medium">Sair</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-gray-800 shadow-lg p-6 border-b border-gray-700">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-white">Dashboard</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-gray-300 text-sm">Bem-vindo de volta,</p>
+                        <p class="text-xl font-bold text-red-500">Carlos Silva</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="p-6">
+            <!-- Alert Banner -->
+            <div class="alert-gradient rounded-lg p-4 mb-6 cursor-pointer hover:shadow-lg transition-all duration-300" onclick="showPendencies()">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                        <div>
+                            <h3 class="font-bold text-lg">Atenção!</h3>
+                            <p class="text-red-100">Você possui 2 pendências, clique aqui para resolver</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold mb-6 text-white">Resumo das suas informações</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Saldo Devedor -->
+                    <div class="card-gradient rounded-xl p-6 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fas fa-dollar-sign text-3xl text-red-500"></i>
+                            <span class="text-xs bg-red-600 px-2 py-1 rounded-full">PENDENTE</span>
+                        </div>
+                        <h4 class="text-gray-300 text-sm font-medium mb-2">Saldo Devedor</h4>
+                        <p class="metric-number text-3xl font-bold">R$ 150,00</p>
+                    </div>
+
+                    <!-- Frequência -->
+                    <div class="card-gradient rounded-xl p-6 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fas fa-chart-bar text-3xl text-red-500"></i>
+                            <span class="text-xs bg-green-600 px-2 py-1 rounded-full">ATIVO</span>
+                        </div>
+                        <h4 class="text-gray-300 text-sm font-medium mb-2">Frequência</h4>
+                        <p class="metric-number text-3xl font-bold">4x</p>
+                        <p class="text-gray-400 text-xs">por semana</p>
+                    </div>
+
+                    <!-- Reposições -->
+                    <div class="card-gradient rounded-xl p-6 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fas fa-redo text-3xl text-red-500"></i>
+                            <span class="text-xs bg-blue-600 px-2 py-1 rounded-full">DISPONÍVEL</span>
+                        </div>
+                        <h4 class="text-gray-300 text-sm font-medium mb-2">Reposições</h4>
+                        <p class="metric-number text-3xl font-bold">3</p>
+                        <p class="text-gray-400 text-xs">disponíveis</p>
+                    </div>
+
+                    <!-- Entradas Restantes -->
+                    <div class="card-gradient rounded-xl p-6 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <i class="fas fa-ticket-alt text-3xl text-red-500"></i>
+                            <span class="text-xs bg-yellow-600 px-2 py-1 rounded-full">LIMITADO</span>
+                        </div>
+                        <h4 class="text-gray-300 text-sm font-medium mb-2">Entradas Restantes</h4>
+                        <p class="metric-number text-3xl font-bold">12</p>
+                        <p class="text-gray-400 text-xs">este mês</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold mb-6 text-white">Ações Rápidas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <button class="action-btn rounded-xl p-8 text-left hover:shadow-2xl transition-all duration-300" onclick="buyPlan()">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-2xl text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-white mb-2">Comprar Plano</h4>
+                                <p class="text-red-100">Renove ou adquira um novo plano</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button class="action-btn rounded-xl p-8 text-left hover:shadow-2xl transition-all duration-300" onclick="scheduleClass()">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-calendar-plus text-2xl text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-white mb-2">Agendar Aula</h4>
+                                <p class="text-red-100">Reserve sua aula ou personal trainer</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pending Items -->
+            <div>
+                <h3 class="text-2xl font-bold mb-6 text-white">Pendências</h3>
+                <div class="space-y-4">
+                    <div class="pending-item rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <i class="fas fa-file-signature text-2xl text-red-500"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white">Termo de Responsabilidade</h4>
+                                    <p class="text-gray-300">Assine o termo de responsabilidade para continuar usando a academia</p>
+                                    <p class="text-red-400 text-sm mt-1">Vencimento: 15/12/2024</p>
+                                </div>
+                            </div>
+                            <button class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-bold transition-colors duration-300" onclick="signTerm()">
+                                Assinar Termo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pending-item rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <i class="fas fa-clipboard-list text-2xl text-red-500"></i>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white">Questionário PAR-Q</h4>
+                                    <p class="text-gray-300">Complete o questionário de prontidão para atividade física</p>
+                                    <p class="text-red-400 text-sm mt-1">Vencimento: 20/12/2024</p>
+                                </div>
+                            </div>
+                            <button class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-bold transition-colors duration-300" onclick="answerPARQ()">
+                                Responder PAR-Q
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function setActiveMenu(element, section) {
+            // Remove active class from all menu items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            element.classList.add('active');
+            
+            // Show notification for navigation
+            showNotification(`Navegando para: ${element.textContent.trim()}`);
+        }
+
+        function showPendencies() {
+            showNotification('Redirecionando para a página de pendências...');
+            // Scroll to pendencies section
+            document.querySelector('main').scrollTo({
+                top: document.querySelector('main').scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        function buyPlan() {
+            showNotification('Redirecionando para a loja de planos...');
+        }
+
+        function scheduleClass() {
+            showNotification('Abrindo sistema de agendamento...');
+        }
+
+        function signTerm() {
+            if (confirm('Deseja assinar o termo de responsabilidade?')) {
+                showNotification('Termo assinado com sucesso!');
+                // Remove the pending item
+                event.target.closest('.pending-item').style.opacity = '0.5';
+                event.target.textContent = 'Assinado ✓';
+                event.target.disabled = true;
+                event.target.classList.add('bg-green-600');
+            }
+        }
+
+        function answerPARQ() {
+            showNotification('Abrindo questionário PAR-Q...');
+        }
+
+        function logout() {
+            if (confirm('Deseja realmente sair do sistema?')) {
+                showNotification('Fazendo logout...');
+                setTimeout(() => {
+                    alert('Logout realizado com sucesso!');
+                }, 1000);
+            }
+        }
+
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('Bem-vindo ao TechFit Dashboard!');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d0ae9fd6b4e3ff',t:'MTc1NzUyNTcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
