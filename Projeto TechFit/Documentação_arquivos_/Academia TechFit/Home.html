@@ -55,13 +55,24 @@
                     <span class="font-medium">Perfil</span>
                 </div>
             </nav>
+            
+            <!-- User Profile -->
+            <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium">João Vitor</p>
+                        <p class="text-sm text-gray-400">Membro Premium</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Main Content -->
         <div class="ml-64 min-h-screen">
-        <!-- =================================
-                HEADER
-             ================================== -->
+            <!-- Header -->
             <header class="bg-gray-800 shadow-lg p-6 border-b border-gray-700">
                 <div class="flex justify-between items-center">
                     <div>
@@ -69,49 +80,14 @@
                         <p class="text-gray-400 mt-1">Bem-vindo de volta, João!</p>
                     </div>
                     <div class="flex items-center space-x-4">
-                    <!-- Notificações -->
-                    <div class="relative">
-                        <i class="fas fa-bell text-xl text-gray-400 cursor-pointer hover:text-red-500 transition-colors"></i>
-                        <span class="absolute -top-2 -right-2 bg-red-600 text-xs text-white rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        <div class="relative">
+                            <i class="fas fa-bell text-xl text-gray-400 cursor-pointer hover:text-red-500 transition-colors"></i>
+                            <span class="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        </div>
+                        <button class="action-btn px-4 py-2 rounded-lg text-white font-medium">
+                            <i class="fas fa-plus mr-2"></i>Novo Agendamento
+                        </button>
                     </div>
-
-                        <!-- =================================
-                         PERFIL DO USUÁRIO
-                         ================================== -->
-                            <!-- Perfil no Header com Dropdown -->
-                            <div class="relative">
-                            <!-- Botão (avatar + nome) -->
-                            <button id="profile-btn" class="flex items-center space-x-3 focus:outline-none">
-                                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center">
-                                <i class="fas fa-user text-white"></i>
-                                </div>
-                                <div class="text-left">
-                                <p class="font-medium">João Silva</p>
-                                <p class="text-sm text-gray-400">Membro Premium</p>
-                                </div>
-                                <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
-                            </button>
-
-                            <!-- Dropdown -->
-                            <div id="profile-menu" 
-                                class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-700" onclick="setActiveMenu(this, 'perfil')">Meu Perfil</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-700">Configurações</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-700 text-red-400">Sair</a>
-                            </div>
-                        </div>
-
-                    <!-- <div class="flex items-center space-x-3"> -->
-                        <!-- Avatar -->
-                        <!-- <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user text-white"></i>
-                        </div> -->
-                        <!-- Nome + Status -->
-                        <!-- <div>
-                            <p class="font-medium">João Silva</p>
-                            <p class="text-sm text-gray-400">Membro Premium</p>
-                        </div>
-                    </div> -->
                 </div>
             </header>
 
@@ -263,7 +239,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Agendamentos Section -->
                 <div id="agendamentos" class="content-section">
                     <div class="card-gradient rounded-xl p-6">
@@ -333,7 +309,7 @@
                     </div>
                 </div>
 
-                <!-- Agenda Section -->
+                <!-- Calendar Section -->
                 <div id="agenda" class="content-section">
                 <div class="card-gradient rounded-xl p-6">
                     <div class="flex justify-between items-center mb-6">
@@ -345,7 +321,7 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                     </div>
-                    
+
                     <!-- Cabeçalho dos dias -->
                     <div class="grid grid-cols-7 gap-2 mb-4 font-bold text-center">
                     <div>Dom</div>
