@@ -1,1 +1,22 @@
-body { font-family: 'Rajdhani', sans-serif; } .card-gradient { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); border: 1px solid #4b5563;} .metric-number { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;}
+body {
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.card-gradient {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border: 1px solid #4b5563;
+}
+.card-gradient:hover {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    border: 1px solid #6b7280;
+}
+
+nav.space-y-4 a:hover {
+    color: #f9fafb;
+    background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateX(5px);
+}
+
+.sidebar-item {
+  transition: all 0.3s ease;
+}

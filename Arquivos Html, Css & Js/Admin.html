@@ -12,16 +12,17 @@
 <body class="bg-gray-900 text-white min-h-screen">
   <div class="flex">
     <!-- Sidebar -->
-    <aside class="w-64 bg-gray-800 h-screen p-6">
-      <h1 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-dumbbell text-red-600 mr-2"></i>Admin</h1>
-      <nav class="space-y-4">
-        <a href="#" class="sidebar-item block px-4 py-2 rounded-lg hover:bg-red-600">Usuários</a>
-        <a href="#" class="sidebar-item block px-4 py-2 rounded-lg hover:bg-red-600">Agendamentos<a>
-        <a href="#" class="sidebar-item block px-4 py-2 rounded-lg hover:bg-red-600">Planos</a>
-        <a href="#" class="sidebar-item block px-4 py-2 rounded-lg hover:bg-red-600">Relatórios</a>
-      </nav>
-    </aside>
-
+     <div class="sidebar-item">
+      <aside class="w-64 bg-gray-800 h-screen p-6">
+        <h1 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-dumbbell text-red-600 mr-2"></i>Admin</h1>
+        <nav class="space-y-4">
+          <a href="#" class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3">Usuários</a>
+          <a href="#" class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3">Agendamentos</a>
+          <a href="#" class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3">Planos</a>
+          <a href="#" class="sidebar-item px-6 py-3 cursor-pointer flex items-center space-x-3">Relatórios</a>
+        </nav>
+      </aside>
+    </div>
     <!-- Main Content -->
     <main class="flex-1 p-8">
       <h2 class="text-3xl font-bold mb-6">Dashboard Administrativo</h2>
