@@ -1,0 +1,6 @@
+body { font-family: 'Rajdhani', sans-serif; } .card-gradient { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); border: 1px solid #4b5563;} .metric-number { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;}
+
+/* Small responsive helper for admin */
+@media (max-width: 1024px) {
+  .sidebar-root { position: fixed; z-index: 60; }
+}
