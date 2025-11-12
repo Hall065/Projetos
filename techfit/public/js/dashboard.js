@@ -162,60 +162,6 @@ function renderWorkoutPlans(plans) {
 }
 
 // ==========================================
-// NAVEGAÇÃO
-// ==========================================
-
-function navigateTo(sectionId) {
-    // Remove active de todos os menus
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Ativa o menu clicado
-    event.currentTarget.classList.add('active');
-
-    // Esconde todas as sections
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
-    });
-
-    // Mostra a section escolhida
-    document.getElementById(sectionId).classList.add('active');
-
-    // Atualiza o título
-    const titles = {
-        'inicio': 'Dashboard',
-        'horarios': 'Horários Disponíveis',
-        'agendamentos': 'Meus Agendamentos',
-        'treinos': 'Meus Treinos',
-        'agenda': 'Agenda de Treinos',
-        'perfil': 'Meu Perfil'
-    };
-
-    document.getElementById('page-title').textContent = titles[sectionId] || 'Dashboard';
-
-    // Carrega dados específicos da seção
-    loadSectionData(sectionId);
-}
-
-async function loadSectionData(sectionId) {
-    switch(sectionId) {
-        case 'horarios':
-            const schedules = await API.getSchedules();
-            renderSchedules(schedules);
-            break;
-        case 'agendamentos':
-            const appointments = await API.getAppointments();
-            renderAppointments(appointments);
-            break;
-        case 'treinos':
-            const plans = await API.getWorkoutPlans();
-            renderWorkoutPlans(plans);
-            break;
-    }
-}
-
-// ==========================================
 // AÇÕES DO USUÁRIO
 // ==========================================
 

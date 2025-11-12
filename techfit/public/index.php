@@ -17,6 +17,38 @@ $dashboardStats = $controller->getDashboardStats();
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos para gerenciar a exibição das seções */
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Estilo para o item ativo do menu */
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        }
+        
+        .sidebar-item:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
     <!-- Sidebar -->
@@ -36,27 +68,27 @@ $dashboardStats = $controller->getDashboardStats();
         
         <!-- Menu Items -->
         <nav class="mt-6 px-3">
-            <div class="sidebar-item active px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('inicio')">
+            <div class="sidebar-item active px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1 transition-all" data-section="inicio">
                 <i class="fas fa-home text-lg w-5"></i>
                 <span class="font-medium">Início</span>
             </div>
-            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('horarios')">
+            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1 transition-all" data-section="horarios">
                 <i class="fas fa-clock text-lg w-5"></i>
                 <span class="font-medium">Horários</span>
             </div>
-            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('agendamentos')">
+            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1 transition-all" data-section="agendamentos">
                 <i class="fas fa-calendar-check text-lg w-5"></i>
                 <span class="font-medium">Agendamentos</span>
             </div>
-            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('treinos')">
+            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1 transition-all" data-section="treinos">
                 <i class="fas fa-dumbbell text-lg w-5"></i>
                 <span class="font-medium">Meus Treinos</span>
             </div>
-            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('agenda')">
+            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1 transition-all" data-section="agenda">
                 <i class="fas fa-calendar text-lg w-5"></i>
                 <span class="font-medium">Calendário</span>
             </div>
-            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('perfil')">
+            <div class="sidebar-item px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1 transition-all" data-section="perfil">
                 <i class="fas fa-user text-lg w-5"></i>
                 <span class="font-medium">Perfil</span>
             </div>
@@ -81,13 +113,11 @@ $dashboardStats = $controller->getDashboardStats();
                     <p class="text-gray-400 mt-1">Bem-vindo de volta, <span id="user-name" class="text-red-500 font-semibold"><?php echo explode(' ', $userData['name'])[0]; ?></span>!</p>
                 </div>
                 <div class="flex items-center space-x-6">
-                    <!-- Notificações -->
                     <div class="relative">
                         <i class="fas fa-bell text-2xl text-gray-400 cursor-pointer hover:text-red-500 transition-colors"></i>
                         <span class="notification-badge absolute -top-2 -right-2 bg-red-600 text-xs text-white rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg" id="notification-count"><?php echo $userData['notifications']; ?></span>
                     </div>
 
-                    <!-- Perfil Dropdown -->
                     <div class="relative">
                         <button id="profile-btn" class="flex items-center space-x-3 hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors focus:outline-none">
                             <div class="w-11 h-11 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center shadow-lg ring-2 ring-red-500 ring-opacity-50">
@@ -100,7 +130,6 @@ $dashboardStats = $controller->getDashboardStats();
                             <i class="fas fa-chevron-down text-gray-400 ml-2 transition-transform" id="dropdown-icon"></i>
                         </button>
 
-                        <!-- Dropdown Menu -->
                         <div id="profile-menu" class="hidden absolute right-0 mt-2 w-56 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 z-50 overflow-hidden">
                             <a href="#" class="block px-4 py-3 hover:bg-gray-700 transition-colors flex items-center space-x-2" onclick="navigateTo('perfil')">
                                 <i class="fas fa-user text-red-500"></i>
@@ -189,21 +218,21 @@ $dashboardStats = $controller->getDashboardStats();
                             Ações Rápidas
                         </h3>
                         <div class="space-y-3">
-                            <button class="w-full action-btn p-4 rounded-xl text-left flex items-center justify-between group" onclick="navigateTo('agendamentos')">
+                            <button class="w-full action-btn p-4 rounded-xl text-left flex items-center justify-between group" data-navigate="agendamentos">
                                 <div class="flex items-center space-x-3">
                                     <i class="fas fa-calendar-plus text-xl"></i>
                                     <span class="font-medium">Agendar Treino</span>
                                 </div>
                                 <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
                             </button>
-                            <button class="w-full bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-left flex items-center justify-between transition-all group border border-gray-700" onclick="navigateTo('treinos')">
+                            <button class="w-full bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-left flex items-center justify-between transition-all group border border-gray-700" data-navigate="treinos">
                                 <div class="flex items-center space-x-3">
                                     <i class="fas fa-list text-xl"></i>
                                     <span class="font-medium">Ver Plano de Treino</span>
                                 </div>
                                 <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
                             </button>
-                            <button class="w-full bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-left flex items-center justify-between transition-all group border border-gray-700" onclick="navigateTo('agenda')">
+                            <button class="w-full bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-left flex items-center justify-between transition-all group border border-gray-700" data-navigate="agenda">
                                 <div class="flex items-center space-x-3">
                                     <i class="fas fa-chart-line text-xl"></i>
                                     <span class="font-medium">Acompanhar Progresso</span>
@@ -273,7 +302,7 @@ $dashboardStats = $controller->getDashboardStats();
                             <i class="fas fa-calendar-check text-green-500 mr-3"></i>
                             Meus Agendamentos
                         </h3>
-                        <button class="action-btn px-5 py-3 rounded-xl font-medium shadow-lg" onclick="navigateTo('horarios')">
+                        <button class="action-btn px-5 py-3 rounded-xl font-medium shadow-lg" data-navigate="horarios">
                             <i class="fas fa-plus mr-2"></i>Novo Agendamento
                         </button>
                     </div>
@@ -378,7 +407,72 @@ $dashboardStats = $controller->getDashboardStats();
             </div>
         </main>
     </div>
-    
+        <!-- Script de Navegação Inline -->
+        <script>
+        // Títulos das seções
+        const sectionTitles = {
+            'inicio': 'Dashboard',
+            'horarios': 'Horários',
+            'agendamentos': 'Agendamentos',
+            'treinos': 'Meus Treinos',
+            'agenda': 'Calendário',
+            'perfil': 'Perfil'
+        };
+
+        // Função de navegação
+        function navigateTo(sectionId) {
+            // Remove active de todas as seções
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active de todos os itens do menu
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Ativa a seção selecionada
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                
+                // Atualiza o título da página
+                const pageTitle = document.getElementById('page-title');
+                if (pageTitle) {
+                    pageTitle.textContent = sectionTitles[sectionId] || 'Dashboard';
+                }
+                
+                // Ativa o item do menu correspondente
+                const menuItem = document.querySelector(`.sidebar-item[data-section="${sectionId}"]`);
+                if (menuItem) {
+                    menuItem.classList.add('active');
+                }
+                
+                // Scroll para o topo
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Event listeners para os itens do menu
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menu lateral
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    navigateTo(section);
+                });
+            });
+            
+            // Botões com data-navigate
+            document.querySelectorAll('[data-navigate]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-navigate');
+                    navigateTo(section);
+                });
+            });
+        });
+    </script>    
     <script src="js/dashboard.js"></script>
 </body>
 </html>
