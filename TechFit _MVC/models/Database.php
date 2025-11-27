@@ -2,10 +2,11 @@
 class Database {
     private static $pdo = null;
 
+    // Dados de conexão do Database
     private $host = 'localhost';
     private $db_name = 'techfit';
     private $username = 'root';
-    private $password = 'SenaiSP'; // Sua senha
+    private $password = 'SenaiSP';
     private $port = 3306;
 
     // Construtor privado para impedir instâncias diretas

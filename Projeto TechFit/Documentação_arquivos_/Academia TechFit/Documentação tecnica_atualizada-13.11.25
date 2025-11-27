@@ -1,0 +1,323 @@
+Documentação Técnica do Projeto: TechFit (v1.0)
+1. Visão Geral do Projeto
+O TechFit é uma aplicação web de gestão de academia (fitness) construída em PHP. O projeto segue o padrão de arquitetura MVC (Model-View-Controller), separando a lógica de negócios, a lógica de dados e a interface do utilizador.
+
+A aplicação consiste num site público (index.php), formulários de autenticação (login.php, cadastro.php) e dois painéis de controlo protegidos por sessão: um para utilizadores (home.php) e um para administradores (admin.php).
+
+2. Estrutura de Pastas
+O projeto está organizado na seguinte estrutura MVC:
+
+/TechFit_MVC/
+├── controllers/
+│   └── AuthController.php      # Processa formulários de login/cadastro
+│
+├── models/
+│   ├── Database.php            # Gere a conexão PDO (Singleton)
+│   ├── User.php                # Lógica de utilizador (login, criar, buscar)
+│   └── Stats.php               # Lógica de estatísticas (para dashboards)
+│
+├── views/
+│   ├── includes/
+│   │   ├── header.php          # Topo HTML reutilizável (head, body)
+│   │   └── footer.php          # Fim HTML reutilizável (scripts, /body)
+│   │
+│   ├── admin_view.php          # Template do painel admin
+│   ├── cadastro_view.php       # Template da página de cadastro
+│   ├── home_view.php           # Template do painel do utilizador
+│   ├── login_view.php          # Template da página de login
+│   └── principal_view.php      # Template da página pública (index)
+│
+├── css/
+│   ├── Admin.css, Home.css, etc. # Estilos customizados por página
+│
+├── js/
+│   ├── Admin.js, Home.js, etc.   # Scripts JS por página
+│
+└── *.php                       # Controladores de página (na raiz)
+3. Banco de Dados (Model)
+A camada de modelo é responsável por toda a interação com o banco de dados MySQL.
+
+Banco de Dados: techfit
+
+Gestão de Conexão (models/Database.php):
+
+Utiliza PDO (PHP Data Objects) para a comunicação com o MySQL.
+
+Implementa o padrão Singleton (Database::connect()) para garantir que existe apenas uma instância da conexão por pedido, poupando recursos.
+
+A senha e credenciais estão centralizadas neste ficheiro.
+
+Inicia a sessão (session_start()) globalmente.
+
+Modelo de Utilizador (models/User.php):
+
+Responsável pela tabela usuarios.
+
+Segurança: Implementa password_hash() (com BCRYPT) ao criar utilizadores e password_verify() ao fazer login. As senhas não são guardadas em texto puro.
+
+Contém a lógica para findByEmail(), login() e create().
+
+Modelo de Estatísticas (models/Stats.php):
+
+Responsável por agregações de dados e consultas complexas.
+
+getAdminStats(): Busca os dados para o painel de admin (contagens totais, últimos utilizadores).
+
+getUserDashboardStats(): Busca os dados para o painel do utilizador (treinos do mês, próxima atividade).
+
+Scripts SQL:
+
+techfit.sql: Script de estrutura (DDL). Cria o banco de dados e todas as tabelas (usuarios, agendamentos, treinos, etc.).
+
+Query Inserts.sql: Script de dados (DML). Popula as tabelas com dados de teste (utilizadores, treinos), com senhas já hasheadas.
+
+4. Controladores (Controller)
+Os controladores são o "cérebro" da aplicação, orquestrando a lógica.
+
+Controladores de Página (na Raiz: index.php, home.php, admin.php):
+
+A sua função é preparar os dados para uma view específica.
+
+Fluxo Padrão:
+
+Verifica a autenticação e autorização (Controle de Acesso).
+
+Inclui os Models necessários (ex: Stats.php).
+
+Chama os métodos do Model para buscar dados (ex: $statsModel->getAdminStats()).
+
+Define variáveis para a View (ex: $total_usuarios, $page_title).
+
+Carrega a View correspondente (ex: require 'views/admin_view.php';).
+
+Controlador de Ação (controllers/AuthController.php):
+
+Este controlador não exibe uma página. Ele existe apenas para processar dados de formulários (POST).
+
+Recebe pedidos das views login_view.php e cadastro_view.php.
+
+Usa o User.php (Model) para validar ou criar utilizadores.
+
+Fluxo de Autenticação:
+
+Utilizador submete o formulário (ex: login_view.php).
+
+O formulário envia os dados para AuthController.php?action=login.
+
+O AuthController chama $userModel->login().
+
+Se for bem-sucedido, define as variáveis de $_SESSION.
+
+Redireciona (header()) o utilizador para a página de destino (home.php ou admin.php).
+
+5. Visão (View)
+A camada de visão é composta pelos ficheiros HTML/PHP que o utilizador vê.
+
+Sistema de Templates (Includes):
+
+views/includes/header.php: Contém todo o <!DOCTYPE>, <head>, CDNs (Tailwind, Font Awesome, Fonts) e a abertura da tag <body>.
+
+views/includes/footer.php: Contém a inclusão de scripts JS específicos e o fecho das tags </body> e </html>.
+
+Benefício: As views (home_view.php, admin_view.php, principal_view.php) são "limpas", contendo apenas o HTML do conteúdo principal e incluindo o header e footer com require.
+
+Exceções (login_view.php, cadastro_view.php):
+
+Estas duas páginas não utilizam os includes padrão.
+
+Motivo: Elas possuem uma estrutura de <body> diferente (com classes flex items-center justify-center para centralizar o formulário), tornando mais simples mantê-las como ficheiros autónomos.
+
+Dados Dinâmicos:
+
+As views exibem dados de forma segura usando echo htmlspecialchars($variavel); para prevenir ataques XSS.
+
+As variáveis (ex: $total_usuarios, $user_nome) são fornecidas pelo Controlador que as chamou.
+
+6. Frontend (CSS/JS)
+CSS:
+
+O layout principal é feito com Tailwind CSS, carregado via CDN em header.php (e nas views de exceção).
+
+Estilos personalizados (ex: .card-gradient, .action-btn) estão em ficheiros CSS dedicados (Admin.css, Home.css, etc.) e são carregados dinamicamente pelo header.php.
+
+JavaScript:
+
+A maioria dos ficheiros JS (Admin.js, Login.js) são simples console.log para depuração.
+
+Home.js: Contém a lógica de interatividade do painel do utilizador, incluindo a troca de separadores (menu lateral) e a renderização do calendário.
+
+
+
+
+
+
+====================================================================================================
+
+
+
+
+====================================================================================================
+
+
+
+
+
+
+Documentação Técnica Detalhada: Projeto TechFit (v1.0)
+1. Arquitetura e Fluxo do Projeto
+O TechFit é construído sobre uma arquitetura MVC (Model-View-Controller) adaptada para PHP, onde os ficheiros na raiz atuam como Controladores de Página.
+
+Model (Modelos - A Fonte da Verdade): Localizados em models/. São classes PHP que lidam exclusivamente com a lógica de dados e a comunicação com o banco de dados (ex: User.php, Stats.php).
+
+View (Vistas - A Interface): Localizadas em views/. São os "templates" (HTML/PHP) que o utilizador vê. São intencionalmente "burras", limitando-se a exibir os dados que o Controlador lhes fornece.
+
+Controller (Controladores - O Cérebro): Ficheiros PHP na raiz (ex: home.php, admin.php) e em controllers/ (ex: AuthController.php). Eles recebem o pedido do utilizador, pedem dados aos Modelos e, em seguida, carregam a Vista apropriada, fornecendo-lhe esses dados.
+
+2. Fluxo de Execução Detalhado (Exemplo: Login)
+Para entender a arquitetura, este é o fluxo completo de um utilizador a fazer login:
+
+Utilizador (View): Acede a http://localhost:8000/login.php.
+
+Controlador (login.php):
+
+Verifica se o utilizador já está logado (verificando $_SESSION['user_id']). Se estiver, redireciona para home.php.
+
+Define as variáveis $page_title e $page_css.
+
+Carrega a views/login_view.php.
+
+Utilizador (View): O login_view.php é exibido. O utilizador preenche o email (admin@techfit.com) e a senha (senha123) e clica em "Entrar".
+
+Formulário (View): O formulário envia os dados (POST) para o action especificado: controllers/AuthController.php?action=login.
+
+Controlador de Ação (AuthController.php):
+
+O script é iniciado. A switch ($action) deteta action=login.
+
+Inclui models/Database.php (que inicia a sessão e dá acesso ao PDO) e models/User.php.
+
+Cria uma instância: $userModel = new User(Database::connect());.
+
+Chama o Modelo: $usuario = $userModel->login('admin@techfit.com', 'senha123');.
+
+Modelo (User.php):
+
+O método login() é executado.
+
+Primeiro, chama findByEmail('admin@techfit.com'). Esta função usa um prepared statement (segurança contra SQL Injection) para procurar o utilizador.
+
+O utilizador é encontrado. O modelo agora tem o hash da senha guardado no banco (ex: $2y$10$wTf...).
+
+O modelo executa password_verify('senha123', $hash_do_banco).
+
+A função retorna true. O método login() retorna os dados do utilizador para o AuthController.
+
+Controlador de Ação (AuthController.php):
+
+if ($usuario) é verdadeiro.
+
+Define as variáveis de sessão: $_SESSION['user_id'] = 5, $_SESSION['user_nome'] = 'Admin Techfit', $_SESSION['user_tipo'] = 'admin'.
+
+Verifica if ($usuario['tipo_usuario'] == 'admin'). É verdadeiro.
+
+Executa header("Location: ../admin.php"); e exit().
+
+Utilizador (View): O navegador é redirecionado para http://localhost:8000/admin.php.
+
+Controlador (admin.php):
+
+O script é iniciado.
+
+if (!isset($_SESSION['user_id']))... é falso (o utilizador está logado).
+
+if ($_SESSION['user_tipo'] != 'admin')... é falso (o utilizador é admin).
+
+O script continua, busca os dados do Stats.php e carrega a views/admin_view.php com os dados do banco.
+
+3. Análise da Camada MODEL (models/)
+Database.php
+Objetivo: Centralizar e gerir a conexão com o banco de dados.
+
+Padrão Singleton: O private static $pdo e private function __construct() garantem que a conexão (new PDO(...)) só é criada uma vez. Todas as outras chamadas a Database::connect() reutilizam a conexão existente. Isto é crucial para a performance, evitando abrir e fechar múltiplas conexões com o MySQL em cada pedido.
+
+PDO (PHP Data Objects): É a interface moderna e segura para aceder a bancos de dados em PHP.
+
+PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION: Esta linha força o PDO a lançar "Exceções" (erros) caso algo corra mal na query. Sem isto, os erros do SQL passariam em silêncio, tornando a depuração um pesadelo.
+
+session_start(): Ao colocar isto no fim do ficheiro, garantimos que qualquer script que precise do banco de dados (praticamente todos) também iniciará automaticamente a gestão de sessões.
+
+User.php
+Objetivo: Lidar com a lógica de negócio da tabela usuarios.
+
+Injeção de Dependência: O public function __construct($pdo) recebe a conexão PDO. O modelo não sabe como a conexão foi criada, ele apenas a usa. Isto é uma excelente prática de design.
+
+findByEmail($email): Usa um prepared statement (prepare(...) e execute([...])). O ? é um marcador. O PDO trata de inserir o valor de $email de forma segura, prevenindo SQL Injection.
+
+login($email, $senha): A função mais importante. Nunca compara a senha vinda do formulário diretamente com o banco. Ela usa password_verify(), a única função correta para verificar um hash criado pelo password_hash().
+
+create(...):
+
+Regra de Negócio: Verifica primeiro se o email já existe (if ($this->findByEmail($email))).
+
+Segurança: Cria o hash da senha com password_hash($senha, PASSWORD_BCRYPT). BCRYPT é o algoritmo de hashing padrão e mais forte recomendado pelo PHP.
+
+Retorno: Retorna true em sucesso, ou uma string (mensagem de erro) em falha. O AuthController usa esta string para informar o utilizador.
+
+Stats.php
+Objetivo: Abstrair (esconder) as queries complexas de agregação dos painéis.
+
+getAdminStats(): Usa queries simples COUNT(*) (rápidas) e um ORDER BY data_cadastro DESC LIMIT 5 para obter os dados do painel de admin.
+
+getUserDashboardStats($user_id):
+
+Treinos do Mês: A query ... MONTH(data_criacao) = MONTH(CURRENT_DATE()) AND YEAR(data_criacao) = YEAR(CURRENT_DATE()) é uma forma eficiente de filtrar os registos que ocorreram no mês e ano atuais.
+
+Próximo Treino: ... data_inicio > NOW() ... ORDER BY data_inicio ASC LIMIT 1 é uma consulta otimizada para encontrar o próximo evento futuro mais próximo.
+
+4. Análise da Camada CONTROLLER (*.php na raiz e controllers/)
+Controladores de Página (Raiz: index.php, home.php, admin.php)
+Objetivo: Atuar como o "porteiro" e "preparador" de cada página.
+
+Bloco de Controle de Acesso: O bloco if (!isset($_SESSION['user_id'])) no topo de home.php e admin.php é o "porteiro". Ele protege a página. O admin.php tem uma segunda verificação (if ($_SESSION['user_tipo'] != 'admin')) que verifica a autorização (não basta estar logado, tem de ser admin).
+
+Bloco de Lógica: Onde o controlador instancia os Modelos (ex: $statsModel = new Stats($pdo);) e busca os dados.
+
+Preparação para a View: Onde os dados complexos (arrays) são "desempacotados" em variáveis simples (ex: $total_usuarios = $adminStats['total_usuarios'];). Isto torna a view (admin_view.php) muito mais limpa e legível.
+
+Carregamento da View: A última linha é sempre require 'views/nome_da_view.php';.
+
+Controlador de Ação (controllers/AuthController.php)
+Objetivo: Processar formulários. Não é feito para ser acedido diretamente pelo navegador.
+
+switch ($action): Atua como um mini-roteador dentro do ficheiro. A URL (?action=login) decide qual bloco de código será executado.
+
+header("Location: ...") e exit(): Após processar, o controlador nunca exibe HTML. Ele redireciona o navegador para uma nova página (um Controlador de Página). O exit() é crucial para garantir que nenhum outro código é executado após o redirecionamento.
+
+5. Análise da Camada VIEW (views/)
+views/includes/header.php e footer.php
+Objetivo: Evitar repetição de código (princípio DRY - Don't Repeat Yourself).
+
+Carregamento Dinâmico de CSS/JS: O header.php usa <?php if (isset($page_css)): ?> para carregar um CSS específico que foi definido no Controlador (ex: admin.php define $page_css = 'Admin.css';). Isto é eficiente, pois a home.php não carrega o Admin.css e vice-versa. O footer.php faz o mesmo para os ficheiros .js.
+
+views/login_view.php e cadastro_view.php
+Exceções: Como explicado, estas páginas são as únicas que não usam os includes padrão.
+
+Motivo: O header.php define um <body> padrão. Estas páginas precisam de um <body> especial com classes Tailwind de centralização: <body class="... flex items-center justify-center ...">. É mais limpo mantê-las como ficheiros autónomos do que criar uma lógica complexa nos includes para lidar com esta exceção.
+
+views/home_view.php (Exemplo de Template)
+Legibilidade: O ficheiro é limpo. Note como as variáveis são usadas de forma simples: <?php echo $treinos_mes; ?>.
+
+Segurança (XSS): Todo o dado vindo do banco que é texto (como nomes ou descrições) é passado por htmlspecialchars(). Ex: <?php echo htmlspecialchars($user_nome); ?>. Isto previne ataques de Cross-Site Scripting (XSS), onde um utilizador malicioso poderia ter-se registado com o nome <script>alert('hackeado')</script>. O htmlspecialchars transforma os caracteres < e > em entidades HTML (&lt; e &gt;), tornando o script inofensivo.
+
+Lógica de Template: A view pode ter lógica simples, como <?php if (empty($atividades)): ?>. Isto é aceitável, pois é apenas lógica de exibição.
+
+6. Frontend (CSS/JS)
+Tailwind CSS: O framework principal, carregado via CDN, que permite a prototipagem rápida e o design utility-first.
+
+CSS Personalizado (.css): Usado para estilos que o Tailwind não cobre facilmente, como os gradientes (.card-gradient), estilos active da sidebar e a fonte Rajdhani.
+
+JavaScript (Home.js):
+
+setActiveMenu: A função principal para o painel home. Ela troca a classe .active do menu lateral e, mais importante, esconde todas as secções de conteúdo (.content-section) e exibe apenas a que foi clicada (document.getElementById(sectionId)).
+
+renderCalendar: Uma função de calendário de baunilha (vanilla JS) que calcula os dias do mês e os insere no HTML, adicionando um eventListener de clique em cada dia.
