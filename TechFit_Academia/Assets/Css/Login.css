@@ -1,0 +1,130 @@
+/* Fonte padrão */
+body {
+    font-family: 'Rajdhani', sans-serif;
+    background-color: #1f2937; /* bg-gray-900 */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Container do formulário */
+.login-container {
+    width: 100%;
+    max-width: 28rem;
+    background-color: #27272a;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding: 2rem;
+}
+
+/* Cabeçalho */
+.login-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-logo {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.login-title {
+    margin-left: 0.75rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+}
+
+/* Subtítulo */
+.login-subtitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Mensagens de erro ou alerta */
+.error-msg {
+    color: #f87171; /* text-red-400 */
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.alert-msg {
+    color: #f87171;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* Inputs */
+.login-input {
+    width: 100%;              /* ocupa 100% do container do form */
+    max-width: 100%;          /* limita à largura do botão */
+    padding: 0.75rem;
+    background-color: #27272a; 
+    border-radius: 0.5rem;
+    color: white;
+    margin-bottom: 1rem;      /* espaço entre inputs */
+    border: 2px solid gray;
+    box-sizing: border-box;   /* garante que padding não aumente a largura */
+}
+
+/* Foco no input */
+.login-input:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.3);
+    outline: none;
+}
+
+/* Labels */
+.login-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: white; /* label branca */
+    font-weight: 500;
+}
+
+/* Botão de ação */
+.action-btn {
+    width: 100%;              /* ocupa toda largura do container do form */
+    padding: 0.75rem;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+}
+
+/* Rodapé */
+.login-footer {
+    text-align: center;
+    color: #9ca3af;
+    margin-top: 1rem;
+}
+
+.login-footer a {
+    color: #dc2626;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}

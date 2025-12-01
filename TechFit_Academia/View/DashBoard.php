@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TechFit Dashboard</title>
-  <link rel="stylesheet" href="DashBoard.css">
+  <link rel="stylesheet" href="../Assets/Css/DashBoard.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -369,6 +369,6 @@
       </div>
     </main>
   </div>
-    <script src="DashBoard.js"></script>
+    <script src="../Assets/Js/DashBoard.js"></script>
 </body>
 </html>
