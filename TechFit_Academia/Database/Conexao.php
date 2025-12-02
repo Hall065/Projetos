@@ -3,7 +3,7 @@ class Conexao {
     private $host = "localhost";
     private $dbname = "techfit";
     private $user = "root"; // ou o usuário do seu MySQL
-    private $pass = "";     // ou a senha do MySQL
+    private $pass = "cada2110";     // ou a senha do MySQL
     public $conn;
 
     public function __construct() {

@@ -1,25 +1,16 @@
 <?php
 session_start();
 
-// Redireciona para dashboard se o usuário já estiver logado
+// 1. Se o usuário já estiver logado, manda direto para o painel
 if(isset($_SESSION['user'])) {
+    // Aqui você poderia colocar aquela lógica de verificar se é admin
+    // Mas por segurança e simplicidade, mandamos pro Dashboard e ele redireciona se precisar
     header("Location: View/DashBoard.php");
     exit;
 }
 
-// Pega a rota da URL (?rota=*lugar_desejado*)
-$rota = $_GET['rota'] ?? '';
-
-switch($rota) {
-    case 'login':
-        include "View/Login.php";
-        break;
-    case 'cadastro':
-        include "View/Cadastro.php";
-        break;
-    default:
-        include "View/Principal.php";
-        break;
-}
-
+// 2. Se NÃO estiver logado, manda para a tela inicial do site (Principal)
+// Se você não tiver a Principal.php pronta, mude para "View/Login.php"
+header("Location: View/Principal.php");
+exit;
 ?>

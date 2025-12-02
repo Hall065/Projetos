@@ -8,3 +8,6 @@ CREATE TABLE usuarios (
     senha VARCHAR(255) NOT NULL,
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE usuarios
+ADD COLUMN nivel_acesso VARCHAR(50) NOT NULL DEFAULT 'comum';
+ALTER TABLE usuarios ADD COLUMN telefone VARCHAR(20) AFTER email;

@@ -199,7 +199,7 @@ body {
 }
 
 /* Quick Actions secundários */
-.card-gradient button.bg-gray-800 {
+.card-gradient button.bg-gray-800:not(#prev-month):not(#next-month) {
     background-color: #27272a;
     color: white;
     width: 100%;
@@ -220,4 +220,11 @@ body {
 /* Footer cards e divs internas */
 .card-gradient div, .card-gradient p, .card-gradient span {
     color: white;
+}
+
+/* Correção específica para os botões de Horários */
+#available-schedules button {
+    width: auto !important;
+    padding-left: 1.5rem;   /* Ajuste visual opcional */
+    padding-right: 1.5rem;  /* Ajuste visual opcional */
 }

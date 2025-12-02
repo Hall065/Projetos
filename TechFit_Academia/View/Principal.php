@@ -6,7 +6,7 @@
   <title>TechFit - Bem-vindo</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="Assets/Css/Principal.css">
+  <link rel="stylesheet" href="../Assets/Css/Principal.css">
 </head>
 <body>
   <!-- Navbar -->
@@ -16,7 +16,7 @@
       <a href="#servicos">Serviços</a>
       <a href="#planos">Planos</a>
       <a href="#contato">Contato</a>
-      <a href="?rota=login" class="btn-red">Login</a>
+      <a href="Login.php" class="btn-red">Login</a>
     </nav>
   </header>
   
@@ -24,7 +24,7 @@
   <section class="hero">
     <h2>Transforme seu corpo com a <span class="highlight-red">TechFit</span></h2>
     <p>Treinos personalizados, acompanhamento e resultados reais.</p>
-    <a href="?rota=login" class="btn-red btn-large">Começar Agora</a>
+    <a href="Login.php" class="btn-red btn-large">Começar Agora</a>
   </section>
   
   <!-- Serviços -->

@@ -1,5 +1,29 @@
+<?php
+require_once __DIR__ . '/../Controller/AuthController.php';
+session_start();
+
+// Se a sessão não estiver iniciada, inicia
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// --- BLOCO ANTI-CACHE (Adicione isto) ---
+// Diz ao navegador: "NUNCA salve uma cópia desta página"
+header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+header("Pragma: no-cache"); // HTTP 1.0.
+header("Expires: 0"); // Proxies.
+// ----------------------------------------
+
+if (!isset($_SESSION['user'])) {
+    header("Location: Login.php");
+    exit;
+}
+// ...
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +33,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body class="bg-gray-900 text-white min-h-screen">
   <!-- Sidebar -->
   <div class="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-gray-900 to-gray-800 shadow-2xl z-50 border-r border-gray-700">
@@ -24,7 +49,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Menu Items -->
     <nav class="mt-6 px-3">
       <div class="sidebar-item active px-4 py-3 rounded-lg cursor-pointer flex items-center space-x-3 mb-1" onclick="navigateTo('inicio')">
@@ -102,10 +127,12 @@
                 <span>Configurações</span>
               </a>
               <hr class="border-gray-700">
-              <a href="Login.html" class="block px-4 py-3 hover:bg-gray-700 transition-colors text-red-400 flex items-center space-x-2">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Sair</span>
-              </a>
+              <form method="POST" class="w-full">
+                <button type="submit" name="logout" class="w-full text-left block px-4 py-3 hover:bg-gray-700 transition-colors text-red-400 flex items-center space-x-2 cursor-pointer">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>Sair</span>
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -130,7 +157,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="card-gradient rounded-xl p-6">
             <div class="flex items-center justify-between">
               <div>
@@ -143,7 +170,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="card-gradient rounded-xl p-6">
             <div class="flex items-center justify-between">
               <div>
@@ -156,7 +183,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="card-gradient rounded-xl p-6">
             <div class="flex items-center justify-between">
               <div>
@@ -255,21 +282,24 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Agendamentos Section -->
       <div id="agendamentos" class="content-section">
         <div class="card-gradient rounded-xl p-6">
           <div class="flex justify-between items-center mb-6">
+
             <h3 class="text-2xl font-bold flex items-center">
               <i class="fas fa-calendar-check text-green-500 mr-3"></i>
               Meus Agendamentos
             </h3>
-            <button class="action-btn px-5 py-3 rounded-xl font-medium shadow-lg">
+
+            <button class="action-btn !w-auto px-5 py-3 rounded-xl font-medium shadow-lg">
               <i class="fas fa-plus mr-2"></i>Novo Agendamento
             </button>
+
           </div>
+
           <div class="space-y-4" id="appointments-list">
-            <!-- Serão carregados via JavaScript -->
           </div>
         </div>
       </div>
@@ -291,15 +321,17 @@
       <div id="agenda" class="content-section">
         <div class="card-gradient rounded-xl p-6">
           <div class="flex justify-between items-center mb-6">
-            <button id="prev-month" class="px-4 py-2 bg-gray-800 rounded-lg hover:bg-red-600 transition-all border border-gray-700 hover:border-red-500">
+            <button id="prev-month" class="!w-auto !justify-center !px-4 !py-2 bg-gray-800 rounded-lg hover:bg-red-600 transition-all border border-gray-700 hover:border-red-500 flex items-center">
               <i class="fas fa-chevron-left"></i>
             </button>
+
             <h3 id="month-year" class="text-2xl font-bold"></h3>
-            <button id="next-month" class="px-4 py-2 bg-gray-800 rounded-lg hover:bg-red-600 transition-all border border-gray-700 hover:border-red-500">
+
+            <button id="next-month" class="!w-auto !justify-center !px-4 !py-2 bg-gray-800 rounded-lg hover:bg-red-600 transition-all border border-gray-700 hover:border-red-500 flex items-center">
               <i class="fas fa-chevron-right"></i>
             </button>
           </div>
-          
+
           <div class="grid grid-cols-7 gap-2 mb-4 font-bold text-center text-gray-400">
             <div>Dom</div>
             <div>Seg</div>
@@ -309,7 +341,7 @@
             <div>Sex</div>
             <div>Sáb</div>
           </div>
-          
+
           <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
         </div>
       </div>
@@ -340,7 +372,7 @@
               </button>
             </div>
           </div>
-          
+
           <div class="card-gradient rounded-xl p-6">
             <h3 class="text-2xl font-bold mb-6 flex items-center">
               <i class="fas fa-chart-bar text-purple-500 mr-3"></i>
@@ -369,6 +401,7 @@
       </div>
     </main>
   </div>
-    <script src="../Assets/Js/DashBoard.js"></script>
+  <script src="../Assets/Js/DashBoard.js"></script>
 </body>
+
 </html>
