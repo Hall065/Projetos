@@ -1,37 +1,31 @@
 <?php
-// 1. Inclui o Controller (necessário para o Logout funcionar)
-require_once __DIR__ . '/../Controller/AuthController.php';
+// Inclui o Controller se for usar funções dele (ex: logout, que está no AuthController)
+require_once __DIR__ . '/../Controller/AuthController.php'; 
 
-// Se a sessão não estiver iniciada, inicia
+// Garante que a sessão está iniciada (se o AuthController não tiver feito)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// --- BLOCO ANTI-CACHE (Adicione isto) ---
-// Diz ao navegador: "NUNCA salve uma cópia desta página"
-header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
-header("Pragma: no-cache"); // HTTP 1.0.
-header("Expires: 0"); // Proxies.
-// ----------------------------------------
+// --- BLOCO ANTI-CACHE (Mantenha) ---
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+// ------------------------------------
 
+// 1. Proteção de Login
 if (!isset($_SESSION['user'])) {
     header("Location: Login.php");
     exit;
 }
 
-// 2. Proteção de Segurança (Route Guard)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Se estiver logado mas NÃO for admin, manda para o Dashboard comum
-$admin_domain = '@techfit.adm.br';
-if (!str_ends_with($_SESSION['user'], $admin_domain)) {
+// 2. Proteção de NÍVEL (CRÍTICO para Admin)
+if (!isset($_SESSION['nivel']) || $_SESSION['nivel'] !== 'admin') {
+    // Se o usuário está logado mas NÃO é admin, vai para o Dashboard comum
     header("Location: DashBoard.php");
     exit;
 }
 
-// Pega o nome do usuário (opcional, só visual)
 $usuario_logado = $_SESSION['user'];
 ?>
 

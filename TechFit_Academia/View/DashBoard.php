@@ -1,24 +1,29 @@
 <?php
-require_once __DIR__ . '/../Controller/AuthController.php';
-session_start();
+// Inclui o Controller se for usar funções dele (ex: logout, que está no AuthController)
+require_once __DIR__ . '/../Controller/AuthController.php'; 
 
-// Se a sessão não estiver iniciada, inicia
+// Garante que a sessão está iniciada (se o AuthController não tiver feito)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// --- BLOCO ANTI-CACHE (Adicione isto) ---
-// Diz ao navegador: "NUNCA salve uma cópia desta página"
-header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
-header("Pragma: no-cache"); // HTTP 1.0.
-header("Expires: 0"); // Proxies.
-// ----------------------------------------
+// --- BLOCO ANTI-CACHE (Mantenha) ---
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+// ------------------------------------
 
+// 1. Proteção de Login: O CRÍTICO
 if (!isset($_SESSION['user'])) {
     header("Location: Login.php");
     exit;
 }
-// ...
+
+// 2. Proteção de Nível: Garante que um Admin não fique no DashBoard
+if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
+    header("Location: Admin.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>

@@ -1,12 +1,33 @@
 <?php
-// ATIVA EXIBIÇÃO DE ERROS
+// ATIVA EXIBIÇÃO DE ERROS (MANTENHA ISSO ATIVO NO SENAI!)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// CAMINHO CORRETO:
+// ==========================================================
+// 🚨 SOLUÇÃO DE SESSÃO LOCAL (CRÍTICO NO AMBIENTE SENAI) 🚨
+// ==========================================================
+// Define o caminho absoluto para a pasta 'sessions_data' (CERTIFIQUE-SE DE CRIAR esta pasta na raiz do projeto)
+$session_dir = __DIR__ . '/../sessions_data';
+
+if (!is_dir($session_dir)) {
+    if (!mkdir($session_dir, 0777, true)) {
+        die("Erro fatal: Não foi possível criar a pasta de sessão: " . $session_dir);
+    }
+}
+session_save_path($session_dir);
+// ==========================================================
+
+
+// Caminho absoluto para o Model/User.php 
 require_once __DIR__ . '/../Database/Model/User.php';
 
+// CRÍTICO: INICIA A SESSÃO APENAS UMA VEZ
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+//... O restante do seu AuthController segue daqui...
 class AuthController
 {
     private $userModel;
@@ -37,9 +58,10 @@ class AuthController
             }
         }
     }
-    
+
     public function login()
     {
+
         if (isset($_POST['email'], $_POST['password'])) {
             $email = $_POST['email'];
             $password = $_POST['password'];
@@ -48,10 +70,9 @@ class AuthController
 
             if ($user) {
                 $_SESSION['user'] = $user['email'];
-                // Opcional: Salvar o nível na sessão também
-                $_SESSION['nivel'] = $user['nivel_acesso']; 
+                $_SESSION['nivel'] = $user['nivel_acesso'];
 
-                // LÓGICA SEGURA: Verifica o que está gravado no banco
+                // Redirecionamento RELATIVO (voltando ao que estava funcionando em casa)
                 if ($user['nivel_acesso'] === 'admin') {
                     header("Location: Admin.php");
                 } else {
@@ -63,17 +84,23 @@ class AuthController
             }
         }
     }
-
-    public function logout() {
+    
+    public function logout()
+    {
         // 1. Zera a variável de sessão na memória agora
         $_SESSION = array();
 
         // 2. Apaga o Cookie de Sessão do navegador (O Passo Mais Importante!)
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
             );
         }
 
@@ -87,7 +114,7 @@ class AuthController
 }
 
 $auth = new AuthController();
-$message = null; 
+$message = null;
 
 // Processamento
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -99,4 +126,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $auth->logout();
     }
 }
-?>
