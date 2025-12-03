@@ -1,10 +1,10 @@
 <?php
 // Inclui o Controller se for usar funções dele (ex: logout, que está no AuthController)
-require_once __DIR__ . '/../Controller/AuthController.php'; 
+require_once __DIR__ . '/../Controller/AuthController.php';
 
 // Garante que a sessão está iniciada (se o AuthController não tiver feito)
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
 
 // --- BLOCO ANTI-CACHE (Mantenha) ---
@@ -15,14 +15,14 @@ header("Expires: 0");
 
 // 1. Proteção de Login: O CRÍTICO
 if (!isset($_SESSION['user'])) {
-    header("Location: Login.php");
-    exit;
+  header("Location: Login.php");
+  exit;
 }
 
 // 2. Proteção de Nível: Garante que um Admin não fique no DashBoard
 if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
-    header("Location: Admin.php");
-    exit;
+  header("Location: Admin.php");
+  exit;
 }
 ?>
 
@@ -83,14 +83,15 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
       </div>
     </nav>
 
-    <!-- User Quick Stats -->
+    <!-- User Quick Stats (Sequência) -->
     <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700 bg-gray-900">
       <div class="text-center">
-        <p class="text-sm text-gray-400">Sequência Atual</p>
-        <p class="text-2xl font-bold metric-number" id="sidebar-streak">7 dias</p>
+        <p class="text-sm text-gray-400 mb-1">Sequência Atual</p>
+        <!-- O ID "sidebar-streak" é o alvo do JavaScript -->
+        <p class="text-2xl font-bold metric-number text-white" id="sidebar-streak">...</p>
       </div>
     </div>
-  </div>
+  </div> <!-- Fim da Sidebar -->
 
   <!-- Main Content -->
   <div class="ml-64 min-h-screen">
@@ -102,10 +103,45 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
           <p class="text-gray-400 mt-1">Bem-vindo de volta, <span id="user-name" class="text-red-500 font-semibold">João</span>!</p>
         </div>
         <div class="flex items-center space-x-6">
-          <!-- Notificações -->
+          <!-- Área de Notificações -->
           <div class="relative">
-            <i class="fas fa-bell text-2xl text-gray-400 cursor-pointer hover:text-red-500 transition-colors"></i>
-            <span class="notification-badge absolute -top-2 -right-2 bg-red-600 text-xs text-white rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg" id="notification-count">3</span>
+
+            <!-- Botão do Sino -->
+            <button id="notif-btn" class="relative focus:outline-none group p-2 rounded-full hover:bg-gray-800 transition-colors">
+              <i class="fas fa-bell text-2xl text-gray-400 group-hover:text-red-500 transition-colors"></i>
+
+              <!-- Bolinha de Contagem (Oculta por padrão) -->
+              <span id="notification-count" class="absolute top-0 right-0 bg-red-600 text-xs text-white rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg hidden animate-pulse border-2 border-gray-900">
+                0
+              </span>
+            </button>
+
+            <!-- Menu Dropdown (Oculto) -->
+            <div id="notif-menu" class="hidden absolute right-0 mt-3 w-80 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 z-50 overflow-hidden transform origin-top-right transition-all animate-fade-in-down">
+
+              <!-- Cabeçalho do Dropdown -->
+              <div class="p-4 border-b border-gray-700 bg-gray-900/50 flex justify-between items-center backdrop-blur-sm">
+                <span class="font-bold text-white flex items-center">
+                  <i class="fas fa-bell mr-2 text-red-500"></i>Notificações
+                </span>
+                <span class="text-xs text-gray-500">Recentes</span>
+              </div>
+
+              <!-- Lista de Notificações (O JS preenche aqui) -->
+              <div id="notif-list" class="max-h-80 overflow-y-auto custom-scrollbar">
+                <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+                  <i class="fas fa-spinner fa-spin mb-2 text-xl"></i>
+                  <p class="text-sm">Carregando...</p>
+                </div>
+              </div>
+
+              <!-- Rodapé do Dropdown -->
+              <div class="p-2 border-t border-gray-700 bg-gray-900/30 text-center">
+                <button onclick="loadNotifications()" class="text-xs text-blue-400 hover:text-blue-300 transition-colors w-full py-1">
+                  <i class="fas fa-sync-alt mr-1"></i> Atualizar agora
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Perfil Dropdown -->
@@ -115,7 +151,7 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
                 <i class="fas fa-user text-white"></i>
               </div>
               <div class="text-left">
-                <p class="font-semibold" id="header-user-name">João Silva</p>
+                <p class="font-semibold" id="header-user-name">João Vitor</p>
                 <p class="text-sm text-gray-400" id="user-plan">Membro Premium</p>
               </div>
               <i class="fas fa-chevron-down text-gray-400 ml-2 transition-transform" id="dropdown-icon"></i>
@@ -155,7 +191,7 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
               <div>
                 <p class="text-gray-400 text-sm mb-1">Treinos Este Mês</p>
                 <p class="text-4xl font-bold metric-number" id="stat-monthly-workouts">24</p>
-                <p class="text-green-500 text-xs mt-1"><i class="fas fa-arrow-up"></i> +12% vs mês anterior</p>
+                <p class="text-green-500 text-xs mt-1"><i class="fas fa-arrow-up" style="color: lightgreen;"></i> +12% vs mês anterior</p>
               </div>
               <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg stat-icon">
                 <i class="fas fa-dumbbell text-white text-xl"></i>
@@ -189,15 +225,18 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
             </div>
           </div>
 
-          <div class="card-gradient rounded-xl p-6">
+          <!-- Card 4: Sequência (Streak) -->
+          <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-lg relative overflow-hidden group hover:border-purple-500 transition-all">
+            <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-purple-600 to-purple-800"></div>
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-gray-400 text-sm mb-1">Sequência</p>
-                <p class="text-4xl font-bold metric-number" id="stat-streak">7</p>
-                <p class="text-sm text-gray-400">dias consecutivos</p>
+                <p class="text-gray-400 text-sm mb-1 uppercase tracking-wider">Sequência Atual</p>
+                <!-- O SEGREDO ESTÁ AQUI: id="stat-streak" -->
+                <p class="text-4xl font-bold text-white metric-number" id="stat-streak">0</p>
+                <p class="text-purple-500 text-xs mt-2 font-medium">Dias consecutivos</p>
               </div>
-              <div class="w-14 h-14 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center shadow-lg stat-icon">
-                <i class="fas fa-trophy text-white text-xl"></i>
+              <div class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                <i class="fas fa-fire text-purple-500 text-2xl"></i>
               </div>
             </div>
           </div>
@@ -233,42 +272,37 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
                 </div>
                 <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
               </button>
+              <!-- NOVO: Botão de Assinatura -->
+              <button class="w-full bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-left flex items-center justify-between transition-all group border border-gray-700 hover:border-green-500 mt-3" onclick="openSubscriptionModal()">
+                <div class="flex items-center space-x-3">
+                  <i class="fas fa-credit-card text-xl text-green-500"></i>
+                  <span class="font-medium">Gerenciar Assinatura</span>
+                </div>
+                <i class="fas fa-external-link-alt opacity-0 group-hover:opacity-100 transition-opacity text-gray-400"></i>
+              </button>
             </div>
           </div>
 
-          <!-- Recent Activity -->
-          <div class="card-gradient rounded-xl p-6">
-            <h3 class="text-2xl font-bold mb-6 flex items-center">
-              <i class="fas fa-history text-blue-500 mr-3"></i>
-              Atividade Recente
-            </h3>
-            <div class="space-y-3" id="recent-activities">
-              <div class="flex items-center space-x-3 p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-green-500 transition-colors">
-                <div class="w-10 h-10 bg-gradient-to-br from-green-600 to-green-800 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-                  <i class="fas fa-check text-white"></i>
-                </div>
-                <div class="flex-1">
-                  <p class="font-medium">Treino de Peito concluído</p>
-                  <p class="text-sm text-gray-400">Há 2 horas</p>
-                </div>
+          <!-- Card Motivação do Dia (Substitui o Atividade Recente) -->
+          <div class="card-gradient rounded-xl p-6 flex flex-col justify-center items-center text-center relative overflow-hidden">
+
+            <!-- Efeito de brilho no topo -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
+
+            <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-4 shadow-lg border border-gray-700">
+              <i class="fas fa-quote-left text-3xl text-red-500"></i>
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-2">Motivação do Dia</h3>
+            <p class="text-gray-400 italic text-lg mb-6">"O único treino ruim é aquele que não aconteceu."</p>
+
+            <div class="w-full">
+              <div class="flex justify-between text-xs text-gray-400 mb-1 font-medium uppercase tracking-wider">
+                <span>Meta da Semana</span>
+                <span>75%</span>
               </div>
-              <div class="flex items-center space-x-3 p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-                  <i class="fas fa-calendar text-white"></i>
-                </div>
-                <div class="flex-1">
-                  <p class="font-medium">Treino agendado para amanhã</p>
-                  <p class="text-sm text-gray-400">Há 1 dia</p>
-                </div>
-              </div>
-              <div class="flex items-center space-x-3 p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-purple-500 transition-colors">
-                <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-                  <i class="fas fa-trophy text-white"></i>
-                </div>
-                <div class="flex-1">
-                  <p class="font-medium">Meta semanal atingida!</p>
-                  <p class="text-sm text-gray-400">Há 2 dias</p>
-                </div>
+              <div class="w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
+                <div class="h-full bg-gradient-to-r from-red-600 to-red-500 w-3/4 shadow-[0_0_15px_rgba(220,38,38,0.6)]"></div>
               </div>
             </div>
           </div>
