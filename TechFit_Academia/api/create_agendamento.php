@@ -1,14 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
-// 1. Chama o gerente de sessão
 require_once __DIR__ . '/../Config/Sessao.php';
-
-// 2. Chama a conexão
 require_once __DIR__ . '/../Database/Conexao.php';
 
-// Segurança
-if (!isset($_SESSION['user'])) {
+// Segurança: Verifica se o ID existe na sessão
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) {
     echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
     exit;
 }
@@ -24,20 +21,18 @@ if (empty($data['date']) || empty($data['time']) || empty($data['type'])) {
 try {
     $conn = Conexao::getConexao();
 
-    // 1. Pega ID do usuário
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+    // 1. OTIMIZAÇÃO: Pega ID direto da sessão
+    $userId = $_SESSION['user']['id'];
 
     // 2. Cria o agendamento
     // Calculamos hora fim como +1 hora da hora inicio (padrão)
     $horaInicio = $data['time']; // ex: 18:00
-    $horaFim = date('H:i', strtotime($horaInicio) + 3600); // +1 hora
+    // Garante formato H:i
+    $horaFim = date('H:i', strtotime($horaInicio) + 3600); 
 
     $stmt = $conn->prepare("INSERT INTO agendamentos (usuario_id, data_treino, hora_inicio, hora_fim, tipo_treino, status) VALUES (:uid, :data, :inicio, :fim, :tipo, 'agendado')");
     
-    $stmt->bindValue(':uid', $user['id']);
+    $stmt->bindValue(':uid', $userId);
     $stmt->bindValue(':data', $data['date']);
     $stmt->bindValue(':inicio', $horaInicio);
     $stmt->bindValue(':fim', $horaFim);
@@ -46,8 +41,9 @@ try {
     if ($stmt->execute()) {
         // --- CRIA NOTIFICAÇÃO ---
         $msg = "Você agendou um treino de " . $data['type'] . " para " . date('d/m', strtotime($data['date'])) . " às " . $data['time'];
+        
         $stmtNotif = $conn->prepare("INSERT INTO notificacoes (usuario_id, mensagem, tipo) VALUES (:uid, :msg, 'info')");
-        $stmtNotif->bindValue(':uid', $user['id']);
+        $stmtNotif->bindValue(':uid', $userId);
         $stmtNotif->bindValue(':msg', $msg);
         $stmtNotif->execute();
         // ------------------------

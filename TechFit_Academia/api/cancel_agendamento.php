@@ -1,14 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
-// 1. Chama o gerente de sessão
 require_once __DIR__ . '/../Config/Sessao.php';
-
-// 2. Chama a conexão
 require_once __DIR__ . '/../Database/Conexao.php';
 
-// Segurança
-if (!isset($_SESSION['user'])) {
+// Verificação de segurança mais robusta
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) {
     echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
     exit;
 }
@@ -23,23 +20,20 @@ if (!isset($data['id'])) {
 try {
     $conn = Conexao::getConexao();
 
-    // 1. Pega o ID do usuário logado (Segurança: só deleta se o treino for dele)
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+    // 1. OTIMIZAÇÃO: Pega o ID direto da sessão
+    $userId = $_SESSION['user']['id'];
 
-    // 2. Deleta o agendamento (ou marca como cancelado)
+    // 2. Deleta o agendamento (Garante que só deleta se for do usuário logado)
     $stmt = $conn->prepare("DELETE FROM agendamentos WHERE id = :id AND usuario_id = :uid");
     $stmt->bindValue(':id', $data['id']);
-    $stmt->bindValue(':uid', $user['id']);
+    $stmt->bindValue(':uid', $userId);
     
     if ($stmt->execute()) {
         if ($stmt->rowCount() > 0) {
             // --- CRIA NOTIFICAÇÃO ---
             $msg = "Agendamento cancelado com sucesso.";
             $stmtNotif = $conn->prepare("INSERT INTO notificacoes (usuario_id, mensagem, tipo) VALUES (:uid, :msg, 'warning')");
-            $stmtNotif->bindValue(':uid', $user['id']);
+            $stmtNotif->bindValue(':uid', $userId);
             $stmtNotif->bindValue(':msg', $msg);
             $stmtNotif->execute();
             // ------------------------

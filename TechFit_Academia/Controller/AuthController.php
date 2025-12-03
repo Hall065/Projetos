@@ -1,33 +1,13 @@
 <?php
-// ATIVA EXIBIÇÃO DE ERROS (MANTENHA ISSO ATIVO NO SENAI!)
+// ATIVA EXIBIÇÃO DE ERROS
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// ==========================================================
-// 🚨 SOLUÇÃO DE SESSÃO LOCAL (CRÍTICO NO AMBIENTE SENAI) 🚨
-// ==========================================================
-// Define o caminho absoluto para a pasta 'sessions_data' (CERTIFIQUE-SE DE CRIAR esta pasta na raiz do projeto)
-$session_dir = __DIR__ . '/../sessions_data';
+require_once __DIR__ . '/../Config/Sessao.php'; 
 
-if (!is_dir($session_dir)) {
-    if (!mkdir($session_dir, 0777, true)) {
-        die("Erro fatal: Não foi possível criar a pasta de sessão: " . $session_dir);
-    }
-}
-session_save_path($session_dir);
-// ==========================================================
-
-
-// Caminho absoluto para o Model/User.php 
 require_once __DIR__ . '/../Database/Model/User.php';
 
-// CRÍTICO: INICIA A SESSÃO APENAS UMA VEZ
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-//... O restante do seu AuthController segue daqui...
 class AuthController
 {
     private $userModel;
@@ -39,40 +19,49 @@ class AuthController
 
     public function register()
     {
-        // CORREÇÃO: Usando os nomes em INGLÊS para bater com o formulário (name, phone, password)
-        if (isset($_POST['name'], $_POST['email'], $_POST['phone'], $_POST['password'])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $email = $_POST['email'];
-            $phone = $_POST['phone']; // O formulário envia 'phone'
-            $password = $_POST['password']; // O formulário envia 'password'
+            $phone = $_POST['phone'];
+            $password = $_POST['password'];
 
             if ($this->userModel->exists($email)) {
                 return ['type' => 'error', 'text' => 'Email já cadastrado!'];
             }
 
-            // O Model/User.php vai se encarregar de traduzir para 'nome' e 'telefone' do banco
             if ($this->userModel->register($name, $email, $phone, $password)) {
-                return ['type' => 'success', 'text' => 'Cadastro realizado com sucesso! Faça seu login.'];
+                return ['type' => 'success', 'text' => 'Cadastro realizado com sucesso!'];
             } else {
-                return ['type' => 'error', 'text' => 'Erro ao cadastrar usuário! Tente novamente.'];
+                return ['type' => 'error', 'text' => 'Erro ao cadastrar usuário!'];
             }
         }
     }
 
     public function login()
     {
-
-        if (isset($_POST['email'], $_POST['password'])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'];
             $password = $_POST['password'];
 
             $user = $this->userModel->login($email, $password);
 
             if ($user) {
-                $_SESSION['user'] = $user['email'];
+                // 1. Mantemos este para compatibilidade com as APIs antigas
+                $_SESSION['user'] = $email;
+
+                // 2. Guardamos o nível
                 $_SESSION['nivel'] = $user['nivel_acesso'];
 
-                // Redirecionamento RELATIVO (voltando ao que estava funcionando em casa)
+                // 3. NOVO: Guardamos os dados completos para exibição rápida no HTML
+                $_SESSION['user'] = [
+                    'id' => $user['id'],
+                    'nome' => $user['nome'],      // Garanta que esta linha existe
+                    'email' => $user['email'],
+                    'telefone' => $user['telefone'],
+                    'plano' => $user['plano'] ?? 'Standard',
+                    'criado_em' => $user['criado_em']
+                ];
+
                 if ($user['nivel_acesso'] === 'admin') {
                     header("Location: Admin.php");
                 } else {
@@ -84,13 +73,10 @@ class AuthController
             }
         }
     }
-    
+
     public function logout()
     {
-        // 1. Zera a variável de sessão na memória agora
         $_SESSION = array();
-
-        // 2. Apaga o Cookie de Sessão do navegador (O Passo Mais Importante!)
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(
@@ -103,11 +89,7 @@ class AuthController
                 $params["httponly"]
             );
         }
-
-        // 3. Destrói a sessão no servidor
         session_destroy();
-
-        // 4. Redireciona para o login
         header("Location: Login.php");
         exit;
     }
@@ -116,7 +98,6 @@ class AuthController
 $auth = new AuthController();
 $message = null;
 
-// Processamento
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['register'])) {
         $message = $auth->register();

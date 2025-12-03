@@ -4,22 +4,22 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../Config/Sessao.php';
 require_once __DIR__ . '/../Database/Conexao.php';
 
-if (!isset($_SESSION['user'])) { echo json_encode([]); exit; }
+// Verificação mais segura
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) { 
+    echo json_encode([]); 
+    exit; 
+}
 
-// Pega a data da URL (ex: get_horarios.php?date=2023-12-05)
-// Se não vier data, usa HOJE.
+// Pega a data da URL ou usa HOJE
 $filtroData = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
 try {
     $conn = Conexao::getConexao();
     
-    // 1. Pega ID do usuário
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $uid = $stmtUser->fetch(PDO::FETCH_ASSOC)['id'];
+    // 1. OTIMIZAÇÃO: Pega ID direto da sessão (removemos a consulta desnecessária na tabela usuarios)
+    $uid = $_SESSION['user']['id'];
 
-    // 2. Busca agendamentos DO DIA ESPECÍFICO
+    // 2. Busca agendamentos DO DIA ESPECÍFICO para este usuário
     $stmt = $conn->prepare("SELECT hora_inicio, tipo_treino FROM agendamentos 
                             WHERE usuario_id = :uid 
                             AND data_treino = :data 
@@ -29,10 +29,10 @@ try {
     $stmt->execute();
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Transforma em um array fácil de buscar (ex: ['18:00:00' => 'Treino A'])
+    // Transforma em um array fácil de buscar (ex: ['18:00' => 'Treino A'])
     $ocupados = [];
     foreach($agendamentos as $ag) {
-        // Pega só a hora cheia (06:00)
+        // Garante formato 00:00 (pega os 5 primeiros chars)
         $hora = substr($ag['hora_inicio'], 0, 5); 
         $ocupados[$hora] = $ag['tipo_treino'];
     }
@@ -51,7 +51,7 @@ try {
             'treino' => null
         ];
 
-        // Verifica se está ocupado
+        // Se o usuário já tem treino nessa hora, marca como indisponível
         if (isset($ocupados[$horaFormatada])) {
             $item['available'] = false;
             $item['treino'] = $ocupados[$horaFormatada];

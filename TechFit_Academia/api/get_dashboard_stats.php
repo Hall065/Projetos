@@ -4,18 +4,19 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../Config/Sessao.php';
 require_once __DIR__ . '/../Database/Conexao.php';
 
-if (!isset($_SESSION['user'])) { echo json_encode([]); exit; }
+// Verificação de segurança (ID deve existir)
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) { 
+    echo json_encode([]); 
+    exit; 
+}
 
 try {
     $conn = Conexao::getConexao();
     
-    // Pega ID
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $uid = $stmtUser->fetch(PDO::FETCH_ASSOC)['id'];
+    // 1. OTIMIZAÇÃO: Pega ID direto da sessão
+    $uid = $_SESSION['user']['id'];
 
-    // 1. Treinos este mês
+    // 2. Treinos este mês
     $stmtMonth = $conn->prepare("SELECT COUNT(*) as total FROM agendamentos 
         WHERE usuario_id = :uid 
         AND status != 'cancelado' 
@@ -25,7 +26,7 @@ try {
     $stmtMonth->execute();
     $monthCount = $stmtMonth->fetch(PDO::FETCH_ASSOC)['total'];
 
-    // 2. Próximo Treino
+    // 3. Próximo Treino
     $stmtNext = $conn->prepare("SELECT data_treino, hora_inicio, tipo_treino FROM agendamentos 
         WHERE usuario_id = :uid 
         AND status != 'cancelado'
@@ -36,7 +37,7 @@ try {
     $stmtNext->execute();
     $nextWorkout = $stmtNext->fetch(PDO::FETCH_ASSOC);
 
-    // 3. Total Geral e Calorias (Mantido como você pediu)
+    // 4. Total Geral e Calorias
     $stmtTotal = $conn->prepare("SELECT COUNT(*) as total FROM agendamentos WHERE usuario_id = :uid AND status != 'cancelado'");
     $stmtTotal->bindValue(':uid', $uid);
     $stmtTotal->execute();
@@ -45,7 +46,7 @@ try {
     // Estimativa: 350 calorias por treino realizado
     $calories = $totalCount * 350; 
 
-    // 4. CÁLCULO DA SEQUÊNCIA (STREAK)
+    // 5. CÁLCULO DA SEQUÊNCIA (STREAK)
     $stmtStreak = $conn->prepare("SELECT DISTINCT data_treino FROM agendamentos 
         WHERE usuario_id = :uid 
         AND status != 'cancelado' 
@@ -81,10 +82,11 @@ try {
     if ($nextWorkout) {
         $data = new DateTime($nextWorkout['data_treino']);
         $hoje = new DateTime();
+        // Correção para cálculo de dias (usando diff absoluto pode dar erro de horas)
         $diff = $hoje->diff($data)->days;
         
         if ($data->format('Y-m-d') == $hoje->format('Y-m-d')) { $prefix = "Hoje"; }
-        elseif ($diff == 1 && $hoje < $data) { $prefix = "Amanhã"; }
+        elseif ($diff <= 1 && $hoje < $data) { $prefix = "Amanhã"; } // Ajuste simples
         else { $prefix = $data->format('d/m'); }
         
         $hora = substr($nextWorkout['hora_inicio'], 0, 5);
@@ -96,7 +98,7 @@ try {
         'monthlyWorkouts' => $monthCount,
         'nextWorkout' => $nextText,
         'nextWorkoutType' => $nextType,
-        'calories' => number_format($calories, 0, ',', '.'), // MANTIDO
+        'calories' => number_format($calories, 0, ',', '.'),
         'totalWorkouts' => $totalCount,
         'streak' => $streak
     ]);

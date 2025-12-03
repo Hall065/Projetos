@@ -1,14 +1,12 @@
 <?php
-header('Content-Type: application/json');
-
-// 1. Chama o gerente de sessão
+// 1. Configuração Centralizada
 require_once __DIR__ . '/../Config/Sessao.php';
-
-// 2. Chama a conexão
 require_once __DIR__ . '/../Database/Conexao.php';
 
-// Se não tiver sessão, retorna lista vazia [] para não quebrar o JS
-if (!isset($_SESSION['user'])) { 
+header('Content-Type: application/json');
+
+// Se não tiver ID na sessão, retorna lista vazia
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) { 
     echo json_encode([]); 
     exit; 
 }
@@ -16,15 +14,12 @@ if (!isset($_SESSION['user'])) {
 try {
     $conn = Conexao::getConexao();
     
-    // Pega ID do usuário logado
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+    // 2. OTIMIZAÇÃO: Pega o ID direto da sessão
+    $userId = $_SESSION['user']['id'];
 
-    // Busca os treinos ordenados pelos mais novos
+    // 3. Busca os treinos diretamente
     $stmt = $conn->prepare("SELECT * FROM planos_treino WHERE usuario_id = :uid ORDER BY criado_em DESC");
-    $stmt->bindValue(':uid', $user['id']);
+    $stmt->bindValue(':uid', $userId);
     $stmt->execute();
     
     // Retorna a lista em JSON

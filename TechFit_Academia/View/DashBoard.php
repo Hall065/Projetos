@@ -100,7 +100,11 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-3xl font-bold" id="page-title">Dashboard</h2>
-          <p class="text-gray-400 mt-1">Bem-vindo de volta, <span id="user-name" class="text-red-500 font-semibold">João</span>!</p>
+          <p class="text-gray-400 mt-1">Bem-vindo de volta,
+            <span id="user-name" class="text-red-500 font-semibold">
+              <?= explode(' ', $_SESSION['user']['nome'])[0] ?>
+            </span>!
+          </p>
         </div>
         <div class="flex items-center space-x-6">
           <!-- Área de Notificações -->
@@ -151,8 +155,8 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
                 <i class="fas fa-user text-white"></i>
               </div>
               <div class="text-left">
-                <p class="font-semibold" id="header-user-name">João Vitor</p>
-                <p class="text-sm text-gray-400" id="user-plan">Membro Premium</p>
+                <p class="font-semibold" id="header-user-name"><?= $_SESSION['user']['nome'] ?? 'Usuário' ?></p>
+                <p class="text-sm text-gray-400" id="user-plan">Membro <?= $_SESSION['user']['plano'] ?? 'Standard' ?></p>
               </div>
               <i class="fas fa-chevron-down text-gray-400 ml-2 transition-transform" id="dropdown-icon"></i>
             </button>
@@ -396,15 +400,23 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
             <div class="space-y-4">
               <div>
                 <label class="block text-gray-400 mb-2 font-medium">Nome Completo</label>
-                <input type="text" id="input-fullname" value="João Silva" class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
+                <input type="text" id="input-fullname"
+                  value="<?= $_SESSION['user']['nome'] ?>"
+                  class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
               </div>
+
               <div>
                 <label class="block text-gray-400 mb-2 font-medium">Email</label>
-                <input type="email" id="input-email" value="joao@email.com" class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
+                <input type="email" id="input-email"
+                  value="<?= $_SESSION['user']['email'] ?>"
+                  class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
               </div>
+
               <div>
                 <label class="block text-gray-400 mb-2 font-medium">Telefone</label>
-                <input type="tel" id="input-phone" value="(11) 99999-9999" class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
+                <input type="tel" id="input-phone"
+                  value="<?= $_SESSION['user']['telefone'] ?>"
+                  class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
               </div>
               <button class="action-btn w-full py-3 rounded-xl font-medium shadow-lg">
                 <i class="fas fa-save mr-2"></i>Salvar Alterações

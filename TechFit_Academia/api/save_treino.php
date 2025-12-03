@@ -1,19 +1,15 @@
 <?php
 header('Content-Type: application/json');
 
-// 1. Chama o gerente de sessão (ISSO CONSERTA O ERRO DE LOGIN)
 require_once __DIR__ . '/../Config/Sessao.php';
-
-// 2. Chama a conexão com o banco
 require_once __DIR__ . '/../Database/Conexao.php';
 
-// 3. Verifica se o usuário está logado
-if (!isset($_SESSION['user'])) { 
+// Verifica sessão e ID
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) { 
     echo json_encode(['success'=>false, 'message'=>'Sessão expirada. Faça login novamente.']); 
     exit; 
 }
 
-// Pega os dados enviados pelo JavaScript (JSON)
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (empty($data['name'])) {
@@ -24,14 +20,12 @@ if (empty($data['name'])) {
 try {
     $conn = Conexao::getConexao();
     
-    // Pega ID do usuário logado
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+    // 1. OTIMIZAÇÃO: Pega ID direto da sessão
+    $userId = $_SESSION['user']['id'];
 
     if (isset($data['id']) && !empty($data['id'])) {
         // --- MODO EDIÇÃO (UPDATE) ---
+        // Importante: Mantive o AND usuario_id = :uid para segurança (ninguém edita treino de outro)
         $stmt = $conn->prepare("UPDATE planos_treino SET nome_treino = :nome, descricao = :desc WHERE id = :id AND usuario_id = :uid");
         $stmt->bindValue(':id', $data['id']);
     } else {
@@ -39,9 +33,9 @@ try {
         $stmt = $conn->prepare("INSERT INTO planos_treino (usuario_id, nome_treino, descricao) VALUES (:uid, :nome, :desc)");
     }
 
-    $stmt->bindValue(':uid', $user['id']);
+    $stmt->bindValue(':uid', $userId);
     $stmt->bindValue(':nome', $data['name']);
-    $stmt->bindValue(':desc', $data['exercises']); 
+    $stmt->bindValue(':desc', $data['exercises'] ?? ''); // O '??' evita erro se exercises vier vazio
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);

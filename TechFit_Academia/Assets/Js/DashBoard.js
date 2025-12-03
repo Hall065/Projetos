@@ -661,6 +661,15 @@ function renderWorkoutPlans(plans) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     
+    // --- 1. CARREGAMENTO IMEDIATO (CORREÇÃO DO PROBLEMA DE F5) ---
+    // Agora essas funções iniciam assim que a página abre, sem esperar o usuário
+    console.log("Iniciando carregamento do Dashboard...");
+    loadAppointments(); 
+    loadWorkouts(); 
+    loadDashboardStats(); 
+    loadNotifications(); 
+
+    // --- 2. CONFIGURAÇÃO DE UI E MODALS ---
     injectModals(); 
     injectScheduleFilter();
 
@@ -676,6 +685,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const treinosSection = document.getElementById('treinos');
     if (treinosSection) {
         const cardHeader = treinosSection.querySelector('h3');
+        // Verifica se o botão já existe para não duplicar
         if (cardHeader && !document.getElementById('btn-new-workout')) {
             const btn = document.createElement('button');
             btn.id = 'btn-new-workout';
@@ -692,6 +702,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // --- 3. MENUS E DROPDOWNS ---
     const notifBtn = document.getElementById('notif-btn');
     const notifMenu = document.getElementById('notif-menu');
     if (notifBtn && notifMenu) {
@@ -728,6 +739,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // --- 4. CALENDÁRIO ---
     let currentDate = new Date();
     renderCalendar(currentDate, []); 
     const prevBtn = document.getElementById("prev-month");
@@ -741,37 +753,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderCalendar(currentDate, userAppointments); 
     });
 
-    const data = await fetchUserData();
-
-    if (data) {
-        userData = data;
-        const headerName = document.getElementById('header-user-name');
-        if (headerName) headerName.innerText = data.name;
-        const headerPlan = document.getElementById('user-plan');
-        if (headerPlan) headerPlan.innerText = 'Membro ' + (data.plan || 'Standard');
-        const welcomeName = document.getElementById('user-name');
-        if (welcomeName) welcomeName.innerText = data.name.split(' ')[0];
-        const notifCount = document.getElementById('notification-count');
-        if (notifCount) {
-            const count = data.notifications || 0;
-            notifCount.innerText = count;
-            notifCount.style.display = (count === 0) ? 'none' : 'flex';
+    // --- 5. DADOS SECUNDÁRIOS (LEGADO) ---
+    // Mantemos isso apenas para preencher coisas que o PHP não preencheu (como memberSince)
+    // Mas note que as funções vitais (loadAppointments etc) já foram chamadas lá em cima.
+    try {
+        const data = await fetchUserData();
+        if (data) {
+            userData = data;
+            const notifCount = document.getElementById('notification-count');
+            if (notifCount) {
+                const count = data.notifications || 0;
+                notifCount.innerText = count;
+                notifCount.style.display = (count === 0) ? 'none' : 'flex';
+            }
+            if(document.getElementById('stat-member-since')) {
+                document.getElementById('stat-member-since').innerText = data.memberSince;
+            }
         }
-
-        if(document.getElementById('input-fullname')) document.getElementById('input-fullname').value = data.name;
-        if(document.getElementById('input-email')) document.getElementById('input-email').value = data.email;
-        if(document.getElementById('input-phone')) document.getElementById('input-phone').value = data.phone;
-        if(document.getElementById('stat-member-since')) document.getElementById('stat-member-since').innerText = data.memberSince;
-        if(document.getElementById('stat-current-plan')) document.getElementById('stat-current-plan').innerText = data.plan || 'Standard';
-
-        // CARREGA TUDO
-        loadAppointments(); 
-        loadWorkouts(); 
-        loadDashboardStats(); 
-        loadNotifications(); // Inicializa notificações
+    } catch (error) {
+        console.log("Dados secundários não carregados, mas o dashboard deve funcionar.");
     }
-
-    // --- POLLING AUTOMÁTICO (NOVO!) ---
-    // Verifica novas notificações a cada 5 segundos
-    setInterval(loadNotifications, 5000);
 });

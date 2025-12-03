@@ -1,12 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
-// 1. Configurações
 require_once __DIR__ . '/../Config/Sessao.php';
 require_once __DIR__ . '/../Database/Conexao.php';
 
 // Segurança
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) {
     echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
     exit;
 }
@@ -21,16 +20,13 @@ if (!isset($data['id'])) {
 try {
     $conn = Conexao::getConexao();
 
-    // Pega ID do usuário
-    $stmtUser = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmtUser->bindValue(':email', $_SESSION['user']);
-    $stmtUser->execute();
-    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+    // 1. OTIMIZAÇÃO: Pega ID direto da sessão
+    $userId = $_SESSION['user']['id'];
 
-    // Deleta a notificação (apenas se pertencer ao usuário)
+    // 2. Deleta a notificação (apenas se pertencer ao usuário)
     $stmt = $conn->prepare("DELETE FROM notificacoes WHERE id = :id AND usuario_id = :uid");
     $stmt->bindValue(':id', $data['id']);
-    $stmt->bindValue(':uid', $user['id']);
+    $stmt->bindValue(':uid', $userId);
     
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
