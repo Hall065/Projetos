@@ -1,157 +1,43 @@
-/* Fonte e reset */
+/* Principal.css - Apenas animações complementares ao Tailwind */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
 body {
     font-family: 'Rajdhani', sans-serif;
-    background-color: #111827;
-    color: white;
-    margin: 0;
-    padding: 0;
+    /* Removemos o resto pois o Tailwind gerencia no HTML */
 }
 
-/* Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    background-color: #1f2937;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+/* Animação para texto com gradiente */
+@keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.logo {
-    font-size: 1.75rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
+.animate-gradient {
+    background-size: 200% auto;
+    animation: gradient-x 3s ease infinite;
 }
 
-.logo i {
-    color: #dc2626;
-    margin-right: 0.5rem;
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
 }
 
-.nav-links a {
-    margin-left: 1.5rem;
-    text-decoration: none;
-    color: white;
-    transition: color 0.3s ease;
+::-webkit-scrollbar-track {
+    background: #111827; 
 }
 
-.nav-links a:hover {
-    color: #dc2626;
+::-webkit-scrollbar-thumb {
+    background: #374151; 
+    border-radius: 4px;
 }
 
-/* Hero */
-.hero {
-    text-align: center;
-    padding: 5rem 1.5rem;
+::-webkit-scrollbar-thumb:hover {
+    background: #dc2626; 
 }
 
-.hero h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.highlight-red {
-    color: #dc2626;
-}
-
-.hero p {
-    color: #9ca3af;
-    margin-bottom: 2rem;
-}
-
-/* Botões */
-.btn-red {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 700;
-    text-align: center;
-    display: inline-block;
-    transition: all 0.3s ease;
-    text-decoration: none;
-}
-
-.btn-red:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
-}
-
-.btn-large {
-    font-size: 1.25rem;
-}
-
-/* Seções */
-.servicos, .planos, .contato {
-    padding: 4rem 1.5rem;
-}
-
-.servicos h3, .planos h3, .contato h3 {
-    font-size: 2rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-/* Grid cards */
-.card-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-}
-
-@media(min-width: 768px){
-    .card-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Cards */
-.card {
-    background-color: #374151;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    text-align: center;
-    border: 1px solid #4b5563;
-}
-
-.card-gradient {
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-}
-
-.card-icon {
-    font-size: 2rem;
-    color: #dc2626;
-    margin-bottom: 1rem;
-}
-
-/* Preços */
-.price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-/* Contato */
-.contact-form {
-    max-width: 40rem;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.contact-form input, .contact-form textarea {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    background-color: #374151;
-    border: none;
-    color: white;
-    resize: none;
-}
-
-.contact-form textarea {
-    height: 6rem;
+/* Suavização de rolagem para âncoras */
+html {
+    scroll-behavior: smooth;
 }

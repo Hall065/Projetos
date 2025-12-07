@@ -11,16 +11,8 @@ try {
     // 1. SEGURANÇA: Só Admin passa
     $eh_admin = false;
     if (isset($_SESSION['user'])) {
-        // Normaliza para garantir
         $nivel = isset($_SESSION['nivel']) ? strtolower(trim($_SESSION['nivel'])) : 'comum';
-        
-        // Suporte para sessão antiga (string) ou nova (array)
-        $email = '';
-        if (is_array($_SESSION['user'])) {
-            $email = $_SESSION['user']['email'] ?? '';
-        } else {
-            $email = $_SESSION['user'];
-        }
+        $email = is_array($_SESSION['user']) ? $_SESSION['user']['email'] : $_SESSION['user'];
         
         if ($nivel === 'admin' || strpos($email, '@techfit.adm.br') !== false) {
             $eh_admin = true;
@@ -31,11 +23,9 @@ try {
         throw new Exception("Acesso restrito.");
     }
 
-    // 2. BUSCAR ALUNOS
+    // 2. BUSCAR ALUNOS (Ignora admins e equipe)
     $conn = Conexao::getConexao();
-    
-    // --- CORREÇÃO AQUI: Removi o campo 'status' da lista ---
-    $sql = "SELECT id, nome, email, telefone, plano, criado_em 
+    $sql = "SELECT id, nome, email, telefone, plano, criado_em, status 
             FROM usuarios 
             WHERE email NOT LIKE '%@techfit.adm.br%' 
             AND nivel_acesso != 'admin' 

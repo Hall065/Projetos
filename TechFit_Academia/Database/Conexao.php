@@ -5,7 +5,7 @@ class Conexao {
     private $host = "localhost";
     private $dbname = "techfit";
     private $user = "root";
-    private $pass = "senaisp"; // Sua senha correta
+    private $pass = "cada2110";
 
     // 2. Propriedade pública para o User.php (Legacy)
     // O User.php faz: $db = new Conexao(); $db->conn;

@@ -1,19 +1,19 @@
 <?php
-// Inclui o Controller se for usar funções dele (ex: logout, que está no AuthController)
+// Inclui o Controller
 require_once __DIR__ . '/../Controller/AuthController.php';
 
-// Garante que a sessão está iniciada (se o AuthController não tiver feito)
+// Garante que a sessão está iniciada
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-// --- BLOCO ANTI-CACHE (Mantenha) ---
+// --- BLOCO ANTI-CACHE ---
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 // ------------------------------------
 
-// 1. Proteção de Login: O CRÍTICO
+// 1. Proteção de Login
 if (!isset($_SESSION['user'])) {
   header("Location: Login.php");
   exit;
@@ -21,7 +21,7 @@ if (!isset($_SESSION['user'])) {
 
 // 2. Proteção de Nível: Garante que um Admin não fique no DashBoard
 if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
-  header("Location: Admin.php");
+  header("Location: Login.php");
   exit;
 }
 ?>
@@ -44,16 +44,18 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
   <div class="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-gray-900 to-gray-800 shadow-2xl z-50 border-r border-gray-700">
     <!-- Logo -->
     <div class="p-6 border-b border-gray-700">
-      <div class="flex items-center space-x-3">
-        <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg">
-          <i class="fas fa-dumbbell text-white text-xl"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-white">TechFit</h1>
-          <p class="text-xs text-gray-400">Fitness Pro</p>
-        </div>
-      </div>
+  <a href="Principal.php" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-300 group">
+    
+    <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-red-900/50 transition-all">
+      <i class="fas fa-dumbbell text-white text-xl"></i>
     </div>
+    
+    <div>
+      <h1 class="text-2xl font-bold text-white">TechFit</h1>
+      <p class="text-xs text-gray-400">Fitness Pro</p>
+    </div>
+  </a>
+</div>
 
     <!-- Menu Items -->
     <nav class="mt-6 px-3">

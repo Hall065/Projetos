@@ -13,6 +13,9 @@ ADD COLUMN nivel_acesso VARCHAR(50) NOT NULL DEFAULT 'comum';
 ALTER TABLE usuarios ADD COLUMN telefone VARCHAR(20) AFTER email;
 ALTER TABLE usuarios ADD COLUMN plano VARCHAR(50) DEFAULT 'Standard';
 
+ALTER TABLE usuarios 
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ativo';
+
 
 CREATE TABLE agendamentos (
     id INT AUTO_INCREMENT PRIMARY KEY,
