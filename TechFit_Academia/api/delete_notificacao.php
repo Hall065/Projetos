@@ -1,29 +1,31 @@
 <?php
 header('Content-Type: application/json');
 
+// Verifica se os arquivos existem para evitar erro fatal (opcional, mas boa prática)
 require_once __DIR__ . '/../Config/Sessao.php';
 require_once __DIR__ . '/../Database/Conexao.php';
 
-// Segurança
+// Segurança: Garante que tem sessão e ID do usuário
 if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) {
-    echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+    // AJUSTE: message -> error
+    echo json_encode(['success' => false, 'error' => 'Usuário não autenticado']);
     exit;
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!isset($data['id'])) {
-    echo json_encode(['success' => false, 'message' => 'ID da notificação não fornecido']);
+    // AJUSTE: message -> error
+    echo json_encode(['success' => false, 'error' => 'ID da notificação não fornecido']);
     exit;
 }
 
 try {
     $conn = Conexao::getConexao();
 
-    // 1. OTIMIZAÇÃO: Pega ID direto da sessão
     $userId = $_SESSION['user']['id'];
 
-    // 2. Deleta a notificação (apenas se pertencer ao usuário)
+    // Deleta garantindo que a notificação pertence ao usuário logado
     $stmt = $conn->prepare("DELETE FROM notificacoes WHERE id = :id AND usuario_id = :uid");
     $stmt->bindValue(':id', $data['id']);
     $stmt->bindValue(':uid', $userId);
@@ -31,10 +33,12 @@ try {
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao apagar.']);
+        // AJUSTE: message -> error
+        echo json_encode(['success' => false, 'error' => 'Erro ao apagar notificação no banco.']);
     }
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
+    // AJUSTE: message -> error
+    echo json_encode(['success' => false, 'error' => 'Erro interno: ' . $e->getMessage()]);
 }
 ?>

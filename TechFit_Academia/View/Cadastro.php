@@ -53,7 +53,36 @@ require_once __DIR__ . '/../Controller/AuthController.php';
       <input type="tel" name="phone" class="register-input" placeholder="(99) 99999-9999" required>
 
       <label class="register-label">Senha</label>
-      <input type="password" name="password" class="register-input" placeholder="••••••••" required>
+      <div style="position: relative; width: 100%; margin-bottom: 15px;">
+        <input type="password"
+          name="password"
+          id="senha-cadastro"
+          class="register-input"
+          placeholder="Sua Senha"
+          required
+          style="padding-right: 40px;">
+
+        <i class="fas fa-eye"
+          onclick="togglePassword('senha-cadastro', this)"
+          style="position: absolute; right: 15px; top: 40%; transform: translateY(-60%); cursor: pointer; color: #888;">
+        </i>
+      </div>
+
+      <label class="register-label">Confirmar Senha</label>
+      <div style="position: relative; width: 100%; margin-bottom: 15px;">
+        <input type="password"
+          name="confirm_password"
+          id="confirma-senha"
+          class="register-input"
+          placeholder="Digite novamente"
+          required
+          style="padding-right: 40px;">
+
+        <i class="fas fa-eye"
+          onclick="togglePassword('confirma-senha', this)"
+          style="position: absolute; right: 15px; top: 40%; transform: translateY(-60%); cursor: pointer; color: #888;">
+        </i>
+      </div>
 
       <button type="submit" name="register" class="action-btn">Cadastrar</button>
     </form>
@@ -61,8 +90,26 @@ require_once __DIR__ . '/../Controller/AuthController.php';
     <div class="register-footer">
       <p>Já tem uma conta? <a href="Login.php">Fazer Login</a></p>
     </div>
-
   </div>
+
+  <script>
+    // Função para mostrar/ocultar senha (Reutilizável)
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        icon.style.color = '#dc2626'; // Opcional: fica vermelho quando visível
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        icon.style.color = '#888'; // Volta a ser cinza
+      }
+    }
+  </script>
 
 </body>
 

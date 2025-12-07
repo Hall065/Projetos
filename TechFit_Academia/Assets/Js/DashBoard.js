@@ -1,19 +1,28 @@
+// CONFIGURAÇÃO DO SWEETALERT 
+const SwalMixin = Swal.mixin({
+    background: '#1f2937', // Cor de fundo escura
+    color: '#ffffff',      // Texto branco
+    confirmButtonColor: '#dc2626', // Vermelho
+    cancelButtonColor: '#4b5563',  // Cinza
+    customClass: { popup: 'border border-gray-700 rounded-xl shadow-2xl' }
+});
+
 // ==========================================
 // 1. CONFIGURAÇÃO DE DADOS GLOBAIS
 // ==========================================
 
 let userData = {};
-let userWorkouts = []; 
+let userWorkouts = [];
 let userAppointments = []; // Guarda agendamentos na memória para o calendário
 
 // Mocks iniciais para Horários (serão substituídos pela API)
 let availableSchedules = [
-  { id: 1, time: "06:00 - 07:00", available: true },
-  { id: 2, time: "18:00 - 19:00", available: false },
-  { id: 3, time: "19:00 - 20:00", available: true },
-  { id: 4, time: "07:00 - 08:00", available: true },
-  { id: 5, time: "20:00 - 21:00", available: true },
-  { id: 6, time: "21:00 - 22:00", available: false }
+    { id: 1, time: "06:00 - 07:00", available: true },
+    { id: 2, time: "18:00 - 19:00", available: false },
+    { id: 3, time: "19:00 - 20:00", available: true },
+    { id: 4, time: "07:00 - 08:00", available: true },
+    { id: 5, time: "20:00 - 21:00", available: true },
+    { id: 6, time: "21:00 - 22:00", available: false }
 ];
 
 // ==========================================
@@ -27,7 +36,7 @@ function navigateTo(sectionId) {
         item.classList.remove('active', 'bg-gray-800', 'border-l-4', 'border-red-500');
         const clickAttr = item.getAttribute('onclick');
         if (clickAttr && clickAttr.includes(`'${sectionId}'`)) {
-            item.classList.add('active'); 
+            item.classList.add('active');
         }
     });
 
@@ -42,15 +51,15 @@ function navigateTo(sectionId) {
     if (target) {
         target.style.display = 'block';
         setTimeout(() => target.classList.add('active'), 10);
-        
+
         // Atualiza Título da Página
         const titles = { 'inicio': 'Dashboard', 'horarios': 'Horários Disponíveis', 'agendamentos': 'Meus Agendamentos', 'treinos': 'Meus Treinos', 'agenda': 'Agenda de Treinos', 'perfil': 'Meu Perfil' };
         const pageTitle = document.getElementById('page-title');
-        if(pageTitle) pageTitle.textContent = titles[sectionId] || 'Dashboard';
-        
+        if (pageTitle) pageTitle.textContent = titles[sectionId] || 'Dashboard';
+
         // Carregamentos específicos por aba
-        if (sectionId === 'treinos') loadWorkouts(); 
-        
+        if (sectionId === 'treinos') loadWorkouts();
+
         if (sectionId === 'horarios') {
             // Usa a data do filtro se existir, senão usa hoje
             const dateInput = document.getElementById('schedule-date-filter');
@@ -64,7 +73,7 @@ function navigateTo(sectionId) {
 function renderCalendar(date, appointments = []) {
     const monthYear = document.getElementById("month-year");
     const calendarDays = document.getElementById("calendar-days");
-    if(!monthYear || !calendarDays) return;
+    if (!monthYear || !calendarDays) return;
 
     const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     monthYear.innerText = `${months[date.getMonth()]} ${date.getFullYear()}`;
@@ -80,15 +89,15 @@ function renderCalendar(date, appointments = []) {
     }
 
     const hoje = new Date();
-    
+
     // Identifica dias com treino
     const diasComTreino = new Set();
-    if(Array.isArray(appointments)) {
+    if (Array.isArray(appointments)) {
         appointments.forEach(apt => {
-            if(apt.status === 'cancelado') return;
+            if (apt.status === 'cancelado') return;
             const partes = apt.data_treino.split('-');
             const ano = parseInt(partes[0]);
-            const mes = parseInt(partes[1]) - 1; 
+            const mes = parseInt(partes[1]) - 1;
             const dia = parseInt(partes[2]);
 
             if (mes === date.getMonth() && ano === date.getFullYear()) {
@@ -110,7 +119,7 @@ function renderCalendar(date, appointments = []) {
         if (diasComTreino.has(i)) {
             classes = "bg-gradient-to-br from-red-600 to-red-800 text-white shadow-lg font-bold";
             // AQUI ESTÁ A MUDANÇA: Ícone de Haltere em vez de bolinha
-            iconHtml = `<div class="mt-1 animate-pulse"><i class="fas fa-dumbbell text-[10px] text-white opacity-80"></i></div>`; 
+            iconHtml = `<div class="mt-1 animate-pulse"><i class="fas fa-dumbbell text-[10px] text-white opacity-80"></i></div>`;
         }
 
         // Adiciona evento onclick para abrir detalhes do dia
@@ -145,28 +154,28 @@ async function loadDashboardStats() {
     try {
         const response = await fetch('../api/get_dashboard_stats.php');
         const stats = await response.json();
-        
+
         if (stats && !stats.error) {
             // Cards Padrão
-            if(document.getElementById('stat-monthly-workouts')) document.getElementById('stat-monthly-workouts').innerText = stats.monthlyWorkouts;
-            if(document.getElementById('stat-next-workout')) document.getElementById('stat-next-workout').innerText = stats.nextWorkout;
-            if(document.getElementById('stat-next-workout-type')) document.getElementById('stat-next-workout-type').innerText = stats.nextWorkoutType;
-            if(document.getElementById('stat-calories')) document.getElementById('stat-calories').innerText = stats.calories;
-            
+            if (document.getElementById('stat-monthly-workouts')) document.getElementById('stat-monthly-workouts').innerText = stats.monthlyWorkouts;
+            if (document.getElementById('stat-next-workout')) document.getElementById('stat-next-workout').innerText = stats.nextWorkout;
+            if (document.getElementById('stat-next-workout-type')) document.getElementById('stat-next-workout-type').innerText = stats.nextWorkoutType;
+            if (document.getElementById('stat-calories')) document.getElementById('stat-calories').innerText = stats.calories;
+
             // --- ATUALIZA A SEQUÊNCIA (STREAK) NOS DOIS LUGARES ---
-            
+
             // 1. No Card Principal (Topo da página)
-            if(document.getElementById('stat-streak')) {
+            if (document.getElementById('stat-streak')) {
                 document.getElementById('stat-streak').innerText = stats.streak;
             }
-            
+
             // 2. Na Barra Lateral (Sidebar esquerda)
-            if(document.getElementById('sidebar-streak')) {
+            if (document.getElementById('sidebar-streak')) {
                 document.getElementById('sidebar-streak').innerText = `${stats.streak} dias`;
             }
 
             // Aba Perfil
-            if(document.getElementById('stat-total-workouts')) document.getElementById('stat-total-workouts').innerText = stats.totalWorkouts;
+            if (document.getElementById('stat-total-workouts')) document.getElementById('stat-total-workouts').innerText = stats.totalWorkouts;
         }
     } catch (e) {
         console.error("Erro ao carregar estatísticas", e);
@@ -177,10 +186,10 @@ async function loadNotifications() {
     try {
         const response = await fetch('../api/get_notificacoes.php');
         const result = await response.json();
-        
+
         const list = document.getElementById('notif-list');
         const badge = document.getElementById('notification-count');
-        
+
         if (!result.data || result.data.length === 0) {
             list.innerHTML = '<p class="text-gray-500 text-center py-4 text-sm">Sem novas notificações.</p>';
             badge.style.display = 'none';
@@ -197,9 +206,9 @@ async function loadNotifications() {
         list.innerHTML = result.data.map(notif => {
             let icon = 'fa-info-circle';
             let color = 'text-blue-500';
-            
-            if(notif.tipo === 'success') { icon = 'fa-check-circle'; color = 'text-green-500'; }
-            if(notif.tipo === 'warning') { icon = 'fa-exclamation-triangle'; color = 'text-yellow-500'; }
+
+            if (notif.tipo === 'success') { icon = 'fa-check-circle'; color = 'text-green-500'; }
+            if (notif.tipo === 'warning') { icon = 'fa-exclamation-triangle'; color = 'text-yellow-500'; }
 
             return `
             <div class="p-3 border-b border-gray-700 hover:bg-gray-700 transition-colors flex items-start justify-between space-x-3 group">
@@ -207,7 +216,7 @@ async function loadNotifications() {
                     <div class="mt-1 ${color}"><i class="fas ${icon}"></i></div>
                     <div>
                         <p class="text-sm text-gray-200 font-medium">${notif.mensagem}</p>
-                        <p class="text-xs text-gray-500 mt-1">${new Date(notif.criado_em).toLocaleDateString('pt-BR')} às ${new Date(notif.criado_em).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</p>
+                        <p class="text-xs text-gray-500 mt-1">${new Date(notif.criado_em).toLocaleDateString('pt-BR')} às ${new Date(notif.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                 </div>
                 <button onclick="deleteNotification(${notif.id})" class="text-gray-500 hover:text-green-500 transition-colors p-1" title="Marcar como lida (Apagar)">
@@ -225,27 +234,27 @@ async function loadAppointments() {
     try {
         const response = await fetch('../api/get_agendamentos.php');
         const agendamentos = await response.json();
-        
+
         if (agendamentos.error || !Array.isArray(agendamentos)) return;
 
         userAppointments = agendamentos;
-        
+
         const listContainer = document.getElementById('appointments-list');
         if (listContainer) {
-            listContainer.innerHTML = ''; 
+            listContainer.innerHTML = '';
             if (agendamentos.length === 0) {
                 listContainer.innerHTML = '<p class="text-gray-400 text-center py-4">Nenhum agendamento encontrado.</p>';
             } else {
                 agendamentos.forEach(item => {
                     const dateParts = item.data_treino.split('-');
                     const dia = dateParts[2];
-                    const mes = dateParts[1]; 
+                    const mes = dateParts[1];
                     const horaInicio = item.hora_inicio.substring(0, 5);
                     const horaFim = item.hora_fim.substring(0, 5);
 
                     let statusColor = 'text-green-500 border-green-500';
                     let statusBg = 'border-green-500';
-                    if(item.status === 'cancelado') { statusColor = 'text-red-500 border-red-500'; statusBg = 'border-red-500'; }
+                    if (item.status === 'cancelado') { statusColor = 'text-red-500 border-red-500'; statusBg = 'border-red-500'; }
 
                     const html = `
                         <div class="flex items-center space-x-4 p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-red-500 transition-all mb-3">
@@ -276,7 +285,7 @@ async function loadAppointments() {
         }
 
         // Atualiza calendário
-        const currentDate = new Date(); 
+        const currentDate = new Date();
         renderCalendar(currentDate, userAppointments);
 
     } catch (error) {
@@ -289,7 +298,7 @@ async function loadWorkouts() {
         const response = await fetch('../api/get_treinos.php');
         const treinos = await response.json();
         userWorkouts = treinos || [];
-        renderWorkoutPlans(userWorkouts); 
+        renderWorkoutPlans(userWorkouts);
     } catch (e) {
         console.error("Erro ao buscar treinos", e);
     }
@@ -298,7 +307,7 @@ async function loadWorkouts() {
 async function loadSchedules(dateStr) {
     try {
         const container = document.getElementById('available-schedules');
-        if(container) container.innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Verificando agenda...</p>';
+        if (container) container.innerHTML = '<p class="text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Verificando agenda...</p>';
 
         const response = await fetch(`../api/get_horarios.php?date=${dateStr}`);
         const schedules = await response.json();
@@ -392,12 +401,12 @@ function injectModals() {
 function injectScheduleFilter() {
     const section = document.getElementById('horarios');
     if (!section) return;
-    
+
     const header = section.querySelector('h3');
-    if(header && !document.getElementById('schedule-date-filter')) {
+    if (header && !document.getElementById('schedule-date-filter')) {
         const container = document.createElement('div');
         container.className = "flex flex-col md:flex-row justify-between items-center mb-6 gap-4";
-        
+
         header.parentNode.insertBefore(container, header);
         container.appendChild(header);
         header.classList.remove('mb-6');
@@ -416,7 +425,7 @@ function injectScheduleFilter() {
         document.getElementById('schedule-date-filter').addEventListener('change', (e) => {
             loadSchedules(e.target.value);
         });
-        
+
         loadSchedules(today);
     }
 }
@@ -426,17 +435,17 @@ function openDayDetails(year, month, day) {
     const modal = document.getElementById('day-details-modal');
     const title = document.getElementById('day-modal-title');
     const content = document.getElementById('day-modal-content');
-    
+
     // Formata título
     const dateStr = `${day}/${month + 1}/${year}`;
     title.innerHTML = `<i class="fas fa-calendar-day text-red-500 mr-3"></i>Dia ${dateStr}`;
-    
+
     // Filtra treinos do dia
     content.innerHTML = '';
-    
+
     // Procura nos agendamentos globais
     const treinosDoDia = userAppointments.filter(apt => {
-        if(apt.status === 'cancelado') return false;
+        if (apt.status === 'cancelado') return false;
         const partes = apt.data_treino.split('-');
         const aptAno = parseInt(partes[0]);
         const aptMes = parseInt(partes[1]) - 1;
@@ -477,7 +486,7 @@ function openDayDetails(year, month, day) {
 // Abre Modal com dados Pré-Preenchidos (Vindo do Horário)
 function openAppointmentModal(preDate = null, preTime = null) {
     const select = document.getElementById('modal-type');
-    select.innerHTML = ''; 
+    select.innerHTML = '';
 
     if (userWorkouts.length === 0) {
         const opt = document.createElement('option');
@@ -507,7 +516,7 @@ function openAppointmentModal(preDate = null, preTime = null) {
 
 function openWorkoutModal(id = null, name = '', desc = '') {
     const modal = document.getElementById('workout-modal');
-    document.getElementById('workout-id').value = id || ''; 
+    document.getElementById('workout-id').value = id || '';
     document.getElementById('workout-name').value = name;
     document.getElementById('workout-desc').value = desc;
     document.getElementById('workout-modal-title').innerText = id ? 'Editar Treino' : 'Novo Plano de Treino';
@@ -531,16 +540,30 @@ async function handleAppointmentSubmit(event) {
         const result = await response.json();
         if (result.success) {
             document.getElementById('appointment-modal').classList.add('hidden');
-            loadAppointments(); 
+
+            // Alerta Bonito de Sucesso
+            SwalMixin.fire({
+                icon: 'success',
+                title: 'Confirmado!',
+                text: 'Seu agendamento foi realizado com sucesso.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // Recarrega as listas (Mantenha as funções que já existiam aqui)
+            loadAppointments();
             loadDashboardStats();
-            loadNotifications(); 
-            
+            loadNotifications();
             const scheduleFilter = document.getElementById('schedule-date-filter');
-            if(scheduleFilter && scheduleFilter.value === data) {
-                loadSchedules(data);
-            }
+            if (scheduleFilter) loadSchedules(scheduleFilter.value);
+
         } else {
-            alert('Erro: ' + result.message);
+            // Alerta Bonito de Erro
+            SwalMixin.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: result.error || 'Não foi possível realizar o agendamento.'
+            });
         }
     } catch (e) { alert('Erro na conexão.'); }
 }
@@ -558,7 +581,7 @@ async function handleWorkoutSubmit(event) {
         const result = await response.json();
         if (result.success) {
             document.getElementById('workout-modal').classList.add('hidden');
-            loadWorkouts(); 
+            loadWorkouts();
         } else {
             alert('Erro: ' + result.message);
         }
@@ -570,41 +593,130 @@ async function deleteWorkout(id) {
     try {
         await fetch('../api/delete_treino.php', { method: 'POST', body: JSON.stringify({ id: id }) });
         loadWorkouts();
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
 }
 
 async function saveProfile() {
     const name = document.getElementById('input-fullname').value;
     const phone = document.getElementById('input-phone').value;
-    const btn = event.target; 
+
+    // Captura o botão que foi clicado
+    const btn = event.target;
     const originalText = btn.innerHTML;
+
+    // Muda o texto do botão para "Salvando..."
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
     try {
-        await fetch('../api/update_profile.php', { method: 'POST', body: JSON.stringify({ name, phone }) });
-        alert('Perfil atualizado!');
-        document.getElementById('header-user-name').innerText = name;
-        document.getElementById('user-name').innerText = name.split(' ')[0];
-    } catch (e) { alert('Erro ao salvar.'); } 
-    finally { btn.innerHTML = originalText; }
+        const response = await fetch('../api/update_profile.php', {
+            method: 'POST',
+            body: JSON.stringify({ name, phone })
+        });
+
+        // Opcional: Ler a resposta para garantir que o PHP não deu erro
+        // const result = await response.json(); 
+
+        // --- AQUI ESTÁ A MUDANÇA (Sai alert, entra SwalMixin) ---
+        SwalMixin.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: 'Perfil atualizado com sucesso.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        // --------------------------------------------------------
+
+        // Atualiza os nomes na tela sem precisar recarregar
+        const headerName = document.getElementById('header-user-name');
+        if (headerName) headerName.innerText = name;
+
+        const userName = document.getElementById('user-name');
+        if (userName) userName.innerText = name.split(' ')[0];
+
+    } catch (e) {
+        // --- MUDANÇA NO ERRO TAMBÉM ---
+        SwalMixin.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: 'Erro ao salvar o perfil.'
+        });
+    } finally {
+        // Volta o botão ao normal
+        btn.innerHTML = originalText;
+    }
 }
 
 async function cancelAppointment(id) {
-    if (!confirm('Deseja cancelar este agendamento?')) return;
-    try {
-        await fetch('../api/cancel_agendamento.php', { method: 'POST', body: JSON.stringify({ id }) });
-        loadAppointments(); 
-        loadDashboardStats();
-        loadNotifications(); 
-        const scheduleFilter = document.getElementById('schedule-date-filter');
-        if(scheduleFilter) loadSchedules(scheduleFilter.value);
-    } catch (e) { alert('Erro ao cancelar.'); }
+    // Pergunta se quer cancelar
+    const result = await SwalMixin.fire({
+        title: 'Cancelar Agendamento?',
+        text: "O horário ficará livre novamente.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, cancelar!',
+        cancelButtonText: 'Não, manter'
+    });
+
+    // Se o usuário clicou em SIM
+    if (result.isConfirmed) {
+        try {
+            await fetch('../api/cancel_agendamento.php', {
+                method: 'POST',
+                body: JSON.stringify({ id })
+            });
+
+            // Sucesso
+            SwalMixin.fire({
+                icon: 'success',
+                title: 'Cancelado',
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            // Atualiza a tela
+            loadAppointments();
+            loadDashboardStats();
+            loadNotifications();
+            const scheduleFilter = document.getElementById('schedule-date-filter');
+            if (scheduleFilter) loadSchedules(scheduleFilter.value);
+
+        } catch (e) {
+            SwalMixin.fire({ icon: 'error', title: 'Erro', text: 'Erro ao cancelar.' });
+        }
+    }
 }
 
 async function deleteNotification(id) {
     try {
-        await fetch('../api/delete_notificacao.php', { method: 'POST', body: JSON.stringify({ id: id }) });
-        loadNotifications(); 
-    } catch (e) { console.error("Erro ao apagar notificação", e); }
+        await fetch('../api/delete_notificacao.php', { 
+            method: 'POST', 
+            body: JSON.stringify({ id: id }) 
+        });
+        
+        // Atualiza a lista
+        loadNotifications();
+
+        // --- ADICIONADO: FEEDBACK VISUAL DISCRETO (TOAST) ---
+        // Cria um alerta pequeno no canto da tela que some sozinho
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'bottom-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#1f2937', // Combina com seu tema escuro
+            color: '#ffffff'
+        });
+        
+        Toast.fire({
+            icon: 'success',
+            title: 'Notificação removida'
+        });
+        // ----------------------------------------------------
+
+    } catch (e) { 
+        console.error("Erro ao apagar notificação", e); 
+    }
 }
 
 // ==========================================
@@ -612,9 +724,9 @@ async function deleteNotification(id) {
 // ==========================================
 
 function renderSchedules(schedules, dateStr) {
-  const container = document.getElementById('available-schedules');
-  if(!container) return;
-  container.innerHTML = schedules.map(s => `
+    const container = document.getElementById('available-schedules');
+    if (!container) return;
+    container.innerHTML = schedules.map(s => `
     <div class="schedule-item bg-gray-800 p-5 rounded-xl border-l-4 ${s.available ? 'border-green-500' : 'border-red-500'} transition-all flex justify-between items-center group">
       <div>
         <p class="font-bold text-lg text-white">${s.label}</p>
@@ -623,25 +735,25 @@ function renderSchedules(schedules, dateStr) {
         </p>
       </div>
       ${s.available
-        ? `<button onclick="openAppointmentModal('${dateStr}', '${s.time}')" class="bg-gray-700 hover:bg-green-600 hover:text-white text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            ? `<button onclick="openAppointmentModal('${dateStr}', '${s.time}')" class="bg-gray-700 hover:bg-green-600 hover:text-white text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
              <i class="fas fa-plus mr-1"></i> Agendar
            </button>`
-        : `<button disabled class="opacity-50 cursor-not-allowed text-gray-500 px-4 py-2 text-sm font-medium">Ocupado</button>`
-      }
+            : `<button disabled class="opacity-50 cursor-not-allowed text-gray-500 px-4 py-2 text-sm font-medium">Ocupado</button>`
+        }
     </div>
   `).join('');
 }
 
 function renderWorkoutPlans(plans) {
-  const container = document.getElementById('workout-plans');
-  if(!container) return;
-  
-  if (!plans || plans.length === 0) {
-      container.innerHTML = '<div class="col-span-full text-gray-400 text-center py-4">Você ainda não criou nenhum plano de treino.</div>';
-      return;
-  }
-  
-  container.innerHTML = plans.map(p => `
+    const container = document.getElementById('workout-plans');
+    if (!container) return;
+
+    if (!plans || plans.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-gray-400 text-center py-4">Você ainda não criou nenhum plano de treino.</div>';
+        return;
+    }
+
+    container.innerHTML = plans.map(p => `
     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-red-500 transition-all relative group flex flex-col justify-between h-full">
       <div class="flex justify-between items-start gap-4 mb-4">
           <h4 class="text-xl font-bold text-red-400 break-words flex-1">${p.nome_treino}</h4>
@@ -660,24 +772,24 @@ function renderWorkoutPlans(plans) {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    
+
     // --- 1. CARREGAMENTO IMEDIATO (CORREÇÃO DO PROBLEMA DE F5) ---
     // Agora essas funções iniciam assim que a página abre, sem esperar o usuário
     console.log("Iniciando carregamento do Dashboard...");
-    loadAppointments(); 
-    loadWorkouts(); 
-    loadDashboardStats(); 
-    loadNotifications(); 
+    loadAppointments();
+    loadWorkouts();
+    loadDashboardStats();
+    loadNotifications();
 
     // --- 2. CONFIGURAÇÃO DE UI E MODALS ---
-    injectModals(); 
+    injectModals();
     injectScheduleFilter();
 
-    const saveBtn = document.querySelector('#perfil button.action-btn'); 
-    if(saveBtn) saveBtn.addEventListener('click', saveProfile);
+    const saveBtn = document.querySelector('#perfil button.action-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveProfile);
 
     const newAptBtn = document.querySelector('#agendamentos button.action-btn');
-    if(newAptBtn) {
+    if (newAptBtn) {
         newAptBtn.removeEventListener('click', newAptBtn.onclick);
         newAptBtn.addEventListener('click', () => openAppointmentModal());
     }
@@ -692,7 +804,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.className = "ml-auto bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg transition-colors flex-shrink-0";
             btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Novo Treino';
             btn.onclick = () => openWorkoutModal();
-            
+
             const headerContainer = document.createElement('div');
             headerContainer.className = "flex justify-between items-center mb-6";
             cardHeader.parentNode.insertBefore(headerContainer, cardHeader);
@@ -709,7 +821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         notifBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             notifMenu.classList.toggle('hidden');
-            document.getElementById('profile-menu').classList.add('hidden'); 
+            document.getElementById('profile-menu').classList.add('hidden');
         });
     }
 
@@ -720,37 +832,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             profileMenu.classList.toggle('hidden');
-            if(notifMenu) notifMenu.classList.add('hidden'); 
-            if(dropdownIcon) dropdownIcon.style.transform = profileMenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (notifMenu) notifMenu.classList.add('hidden');
+            if (dropdownIcon) dropdownIcon.style.transform = profileMenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
         });
         document.addEventListener('click', (e) => {
             if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
                 profileMenu.classList.add('hidden');
-                if(dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
+                if (dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
             }
         });
     }
 
     document.addEventListener('click', () => {
-        if(notifMenu) notifMenu.classList.add('hidden');
-        if(profileMenu) {
+        if (notifMenu) notifMenu.classList.add('hidden');
+        if (profileMenu) {
             profileMenu.classList.add('hidden');
-            if(dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
+            if (dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
         }
     });
 
     // --- 4. CALENDÁRIO ---
     let currentDate = new Date();
-    renderCalendar(currentDate, []); 
+    renderCalendar(currentDate, []);
     const prevBtn = document.getElementById("prev-month");
     const nextBtn = document.getElementById("next-month");
-    if(prevBtn) prevBtn.addEventListener("click", () => { 
-        currentDate.setMonth(currentDate.getMonth() - 1); 
-        renderCalendar(currentDate, userAppointments); 
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar(currentDate, userAppointments);
     });
-    if(nextBtn) nextBtn.addEventListener("click", () => { 
-        currentDate.setMonth(currentDate.getMonth() + 1); 
-        renderCalendar(currentDate, userAppointments); 
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar(currentDate, userAppointments);
     });
 
     // --- 5. DADOS SECUNDÁRIOS (LEGADO) ---
@@ -766,7 +878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 notifCount.innerText = count;
                 notifCount.style.display = (count === 0) ? 'none' : 'flex';
             }
-            if(document.getElementById('stat-member-since')) {
+            if (document.getElementById('stat-member-since')) {
                 document.getElementById('stat-member-since').innerText = data.memberSince;
             }
         }
@@ -774,3 +886,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Dados secundários não carregados, mas o dashboard deve funcionar.");
     }
 });
+
+// ==================================================
+// REDE DE SEGURANÇA: Substitui alerts nativos
+// ==================================================
+window.alert = function(message) {
+    SwalMixin.fire({
+        title: 'Aviso',
+        text: message,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+};

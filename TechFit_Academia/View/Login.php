@@ -16,6 +16,7 @@ require_once __DIR__ . '/../Controller/AuthController.php';
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../Assets/Css/Login.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -47,20 +48,149 @@ require_once __DIR__ . '/../Controller/AuthController.php';
 
     <form method="POST">
       <label class="login-label">Email</label>
-      <input type="email" name="email" class="login-input" placeholder="seu@email.com" required>
+      <input type="email" name="email" class="login-input" placeholder="Email" required>
 
       <label class="login-label">Senha</label>
-      <input type="password" name="password" class="login-input" placeholder="••••••••" required>
+      <div style="position: relative; width: 100%;">
+        <input type="password"
+          name="password"
+          id="senha-login"
+          class="login-input"
+          placeholder="••••••••"
+          required
+          style="padding-right: 40px;">
+        <i class="fas fa-eye"
+          onclick="togglePassword('senha-login', this)"
+          style="position: absolute; right: 15px; top: 40%; transform: translateY(-60%); cursor: pointer; color: #888;">
+        </i>
+      </div>
 
       <button type="submit" name="login" class="action-btn">Entrar</button>
     </form>
 
     <div class="login-footer">
       <p>Não tem uma conta? <a href="Cadastro.php">Cadastre-se</a></p>
-      <a href="#">Esqueci minha senha</a>
+    </div>
+    <div class="login-footer">
+      <a href="#" onclick="abrirRecuperacaoSenha(event)" class="text-sm text-gray-400 hover:text-red-500 transition-colors">
+        Esqueceu a senha?
+      </a>
     </div>
 
   </div>
+
+  <script>
+    async function abrirRecuperacaoSenha(event) {
+      if (event) event.preventDefault();
+
+      // Pede o e-mail
+      const {
+        value: email
+      } = await Swal.fire({
+        title: 'Recuperar Senha',
+        input: 'email',
+        inputLabel: 'Digite seu e-mail cadastrado',
+        inputPlaceholder: 'seu@email.com',
+        background: '#1f2937',
+        color: '#fff',
+        confirmButtonText: 'Enviar Link',
+        confirmButtonColor: '#dc2626',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (email) {
+        Swal.fire({
+          title: 'Processando...',
+          didOpen: () => Swal.showLoading(),
+          background: '#1f2937',
+          color: '#fff'
+        });
+
+        try {
+          // Chama a API que criamos
+          const response = await fetch('../api/forgot_password.php', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: email
+            })
+          });
+          const result = await response.json();
+
+          if (result.success) {
+            // Mostra o link (Simulação Local)
+            await Swal.fire({
+              icon: 'success',
+              title: 'Link Gerado!',
+              html: `
+                  <p style="color: #d1d5db; margin-bottom: 20px;">Simulação de envio (clique abaixo):</p>
+                  
+                  <div style="text-align: center;">
+                      <a href="${result.link}" 
+                        style="
+                            display: inline-block; 
+                            background-color: #dc2626 !important; 
+                            color: white !important; 
+                            font-weight: bold; 
+                            padding: 10px 24px;       /* MUDANÇA: Mais fino (10px) e largura ajustada ao texto */
+                            border-radius: 6px;       /* Bordas um pouco mais discretas */
+                            text-decoration: none; 
+                            font-size: 14px;          /* Texto num tamanho mais elegante */
+                            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.4);
+                        "
+                        onmouseover="this.style.backgroundColor='#b91c1c'" 
+                        onmouseout="this.style.backgroundColor='#dc2626'">
+                        REDEFINIR SENHA
+                      </a>
+                  </div>
+                  
+                  <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">Link válido por 1 hora</p>
+              `,
+              background: '#1f2937',
+              color: '#fff',
+              showConfirmButton: false,
+              showCloseButton: true
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: result.error,
+              background: '#1f2937',
+              color: '#fff'
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Falha na conexão.',
+            background: '#1f2937',
+            color: '#fff'
+          });
+        }
+      }
+    }
+
+    // Função genérica para mostrar/ocultar senha
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+
+      if (input.type === 'password') {
+        // Vira texto (mostra a senha)
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash'); // Muda ícone para "olho cortado"
+        icon.classList.add('text-red-500'); // (Opcional) Deixa vermelho quando visível
+      } else {
+        // Vira password (esconde a senha)
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        icon.classList.remove('text-red-500');
+      }
+    }
+  </script>
 
 </body>
 

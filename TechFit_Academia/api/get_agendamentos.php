@@ -1,7 +1,6 @@
 <?php
 // 1. IMPORTA A CONFIGURAÇÃO CENTRALIZADA DE SESSÃO
 require_once __DIR__ . '/../Config/Sessao.php';
-
 require_once __DIR__ . '/../Database/Conexao.php';
 
 header('Content-Type: application/json');

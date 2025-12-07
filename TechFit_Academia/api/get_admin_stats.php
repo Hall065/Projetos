@@ -5,7 +5,7 @@ ob_start();
 // 2. INCLUI A CONFIGURAÇÃO DE SESSÃO DO SISTEMA
 // Isso garante que a API leia a MESMA sessão do Login
 require_once __DIR__ . '/../Config/Sessao.php'; 
-require_once __DIR__ . '/../Config/conexao.php'; 
+require_once __DIR__ . '/../Database/Conexao.php';
 
 header('Content-Type: application/json');
 

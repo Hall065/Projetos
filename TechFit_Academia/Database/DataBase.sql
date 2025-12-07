@@ -12,9 +12,11 @@ ALTER TABLE usuarios
 ADD COLUMN nivel_acesso VARCHAR(50) NOT NULL DEFAULT 'comum';
 ALTER TABLE usuarios ADD COLUMN telefone VARCHAR(20) AFTER email;
 ALTER TABLE usuarios ADD COLUMN plano VARCHAR(50) DEFAULT 'Standard';
-
 ALTER TABLE usuarios 
 ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ativo';
+ALTER TABLE usuarios 
+ADD COLUMN reset_token VARCHAR(255) NULL, 
+ADD COLUMN reset_expires DATETIME NULL;
 
 
 CREATE TABLE agendamentos (

@@ -1,7 +1,7 @@
 <?php
 ob_start(); // Previne erros de espaço em branco
 require_once __DIR__ . '/../Config/Sessao.php';
-require_once __DIR__ . '/../Config/conexao.php';
+require_once __DIR__ . '/../Database/Conexao.php';
 
 header('Content-Type: application/json');
 

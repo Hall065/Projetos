@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../Config/conexao.php';
-require_once __DIR__ . '/../Config/Sessao.php'; // Adicione validação de admin aqui se quiser blindar
+require_once __DIR__ . '/../Database/Conexao.php';
+require_once __DIR__ . '/../Config/Sessao.php';
 
 header('Content-Type: application/json');
 

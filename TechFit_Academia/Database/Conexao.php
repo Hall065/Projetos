@@ -1,43 +1,45 @@
 <?php
+// Arquivo: Database/Conexao.php
 
 class Conexao {
-    // 1. Configurações do Banco (Centralizadas aqui)
+    // 1. Configurações do Banco (CENTRALIZADAS)
     private $host = "localhost";
     private $dbname = "techfit";
     private $user = "root";
     private $pass = "cada2110";
 
-    // 2. Propriedade pública para o User.php (Legacy)
-    // O User.php faz: $db = new Conexao(); $db->conn;
+    // 2. Compatibilidade Legada ($db->conn)
     public $conn; 
 
-    // 3. Propriedade estática para a API (Singleton)
+    // 3. Singleton para API (Conexao::getConexao())
     private static $pdoInstance;
 
-    // CONSTRUTOR: Roda quando faz "new Conexao()" (Usado no User.php)
     public function __construct() {
         try {
-            $this->conn = new PDO(
-                "mysql:host={$this->host};dbname={$this->dbname};charset=utf8",
-                $this->user,
-                $this->pass
-            );
-            // Configurações padrão de erro
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->conn = $this->connect();
         } catch (PDOException $e) {
-            die("Erro na conexão: " . $e->getMessage());
+            die("Erro fatal na conexão (Construtor): " . $e->getMessage());
         }
     }
 
-    // MÉTODO ESTÁTICO: Roda quando faz "Conexao::getConexao()" (Usado na API)
     public static function getConexao() {
         if (!isset(self::$pdoInstance)) {
-            // Truque: Criamos um "new self()" para reaproveitar a lógica do construtor acima
-            $db = new self(); 
-            self::$pdoInstance = $db->conn; // Guardamos apenas a conexão PDO
+            $temp = new self(); // Usa o construtor acima
+            self::$pdoInstance = $temp->conn;
         }
         return self::$pdoInstance;
+    }
+
+    // Método privado para evitar repetição de código
+    private function connect() {
+        $pdo = new PDO(
+            "mysql:host={$this->host};dbname={$this->dbname};charset=utf8",
+            $this->user,
+            $this->pass
+        );
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        return $pdo;
     }
 }
 ?>
