@@ -1,57 +1,54 @@
 <?php
-// api/get_users.php
-ob_start();
-require_once __DIR__ . '/../Config/Sessao.php';
-require_once __DIR__ . '/../Database/Conexao.php';
-
+// Arquivo: api/get_user.php (Perfil do Aluno Logado)
 header('Content-Type: application/json');
-$response = [];
+require_once __DIR__ . '/../Database/Conexao.php';
+require_once __DIR__ . '/../Config/Sessao.php';
 
-try {
-    // 1. SEGURANÇA: Só Admin passa
-    $eh_admin = false;
-    if (isset($_SESSION['user'])) {
-        // Normaliza para garantir
-        $nivel = isset($_SESSION['nivel']) ? strtolower(trim($_SESSION['nivel'])) : 'comum';
-        
-        // Suporte para sessão antiga (string) ou nova (array)
-        $email = '';
-        if (is_array($_SESSION['user'])) {
-            $email = $_SESSION['user']['email'] ?? '';
-        } else {
-            $email = $_SESSION['user'];
-        }
-        
-        if ($nivel === 'admin' || strpos($email, '@techfit.adm.br') !== false) {
-            $eh_admin = true;
-        }
-    }
-
-    if (!$eh_admin) {
-        throw new Exception("Acesso restrito.");
-    }
-
-    // 2. BUSCAR ALUNOS
-    $conn = Conexao::getConexao();
-    
-    // --- CORREÇÃO AQUI: Removi o campo 'status' da lista ---
-    $sql = "SELECT id, nome, email, telefone, plano, criado_em 
-            FROM usuarios 
-            WHERE email NOT LIKE '%@techfit.adm.br%' 
-            AND nivel_acesso != 'admin' 
-            ORDER BY id DESC";
-    
-    $stmt = $conn->query($sql);
-    $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $response = ['success' => true, 'data' => $alunos];
-
-} catch (Exception $e) {
-    http_response_code(403);
-    $response = ['success' => false, 'error' => $e->getMessage()];
+// 1. Verifica login
+if (!isset($_SESSION['user'])) {
+    echo json_encode(['error' => 'Não autenticado']);
+    exit;
 }
 
-ob_clean();
-echo json_encode($response);
-exit;
+try {
+    $conn = Conexao::getConexao();
+    $email = is_array($_SESSION['user']) ? $_SESSION['user']['email'] : $_SESSION['user'];
+
+    // 2. Busca os dados do usuário logado
+    $stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = :email");
+    $stmt->bindValue(':email', $email);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user) {
+        // Remove dados sensíveis
+        unset($user['senha']);
+        unset($user['reset_token']);
+        unset($user['reset_expires']);
+
+        // --- LÓGICA DO QR CODE (NOVIDADE) ---
+        // Se o usuário ainda não tem token, cria um agora
+        if (empty($user['access_token'])) {
+            // Gera Token: TF + ID + CodigoAleatorio (Ex: TF-15-A1B2)
+            $token = 'TF-' . $user['id'] . '-' . strtoupper(bin2hex(random_bytes(4)));
+            
+            // Salva no banco
+            $update = $conn->prepare("UPDATE usuarios SET access_token = :token WHERE id = :id");
+            $update->bindValue(':token', $token);
+            $update->bindValue(':id', $user['id']);
+            $update->execute();
+            
+            // Atualiza a variável para devolver pro JS
+            $user['access_token'] = $token;
+        }
+        // ------------------------------------
+
+        echo json_encode($user);
+    } else {
+        echo json_encode(['error' => 'Usuário não encontrado']);
+    }
+
+} catch (Exception $e) {
+    echo json_encode(['error' => $e->getMessage()]);
+}
 ?>

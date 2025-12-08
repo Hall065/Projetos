@@ -472,25 +472,59 @@ $nome_display = explode(' ', $usuario_logado['nome'] ?? 'Admin')[0];
             <form id="form-novo-aluno" class="space-y-4">
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">Nome Completo</label>
-                    <input type="text" id="novo-nome" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none">
+                    <input type="text"
+                        id="novo-nome"
+                        required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Ex: João da Silva">
                 </div>
 
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">Email</label>
-                    <input type="email" id="novo-email" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none">
+                    <input type="email"
+                        id="novo-email"
+                        required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Ex: joao@email.com">
                 </div>
 
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">Senha Inicial</label>
                     <div class="relative">
-                        <input type="password" id="novo-senha" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none">
-                        <i class="fas fa-lock absolute right-3 top-3 text-gray-500"></i>
+                        <input type="password"
+                            id="novo-senha"
+                            required
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-white focus:border-red-500 focus:outline-none transition-colors"
+                            placeholder="Mínimo 6 caracteres">
+
+                        <i class="fas fa-eye absolute right-3 top-3 cursor-pointer text-gray-500 hover:text-white transition-colors z-10"
+                            onclick="togglePassword('novo-senha', this)">
+                        </i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Confirmar Senha</label>
+                    <div class="relative">
+                        <input type="password"
+                            id="novo-confirma-senha"
+                            required
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-white focus:border-red-500 focus:outline-none transition-colors"
+                            placeholder="Digite novamente">
+
+                        <i class="fas fa-eye absolute right-3 top-3 cursor-pointer text-gray-500 hover:text-white transition-colors z-10"
+                            onclick="togglePassword('novo-confirma-senha', this)">
+                        </i>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">Telefone</label>
-                    <input type="text" id="novo-telefone" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none">
+                    <input type="text"
+                        id="novo-telefone"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Ex: (11) 99999-8888"
+                        maxlength="15">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -593,5 +627,4 @@ $nome_display = explode(' ', $usuario_logado['nome'] ?? 'Admin')[0];
 
     <script src="../Assets/Js/Admin.js"></script>
 </body>
-
 </html>

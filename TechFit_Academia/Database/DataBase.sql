@@ -17,6 +17,9 @@ ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ativo';
 ALTER TABLE usuarios 
 ADD COLUMN reset_token VARCHAR(255) NULL, 
 ADD COLUMN reset_expires DATETIME NULL;
+ALTER TABLE usuarios ADD COLUMN access_token VARCHAR(100) NULL;
+-- Verifica se a coluna existe, se não, adiciona
+ALTER TABLE usuarios ADD COLUMN foto VARCHAR(255) DEFAULT NULL;
 
 
 CREATE TABLE agendamentos (

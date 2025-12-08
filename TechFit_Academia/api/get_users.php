@@ -1,5 +1,5 @@
 <?php
-// api/get_users.php
+// Arquivo: api/get_users.php (Lista de Alunos para o Admin)
 ob_start();
 require_once __DIR__ . '/../Config/Sessao.php';
 require_once __DIR__ . '/../Database/Conexao.php';
@@ -12,7 +12,13 @@ try {
     $eh_admin = false;
     if (isset($_SESSION['user'])) {
         $nivel = isset($_SESSION['nivel']) ? strtolower(trim($_SESSION['nivel'])) : 'comum';
-        $email = is_array($_SESSION['user']) ? $_SESSION['user']['email'] : $_SESSION['user'];
+        
+        $email = '';
+        if (is_array($_SESSION['user'])) {
+            $email = $_SESSION['user']['email'] ?? '';
+        } else {
+            $email = $_SESSION['user'];
+        }
         
         if ($nivel === 'admin' || strpos($email, '@techfit.adm.br') !== false) {
             $eh_admin = true;
@@ -23,9 +29,11 @@ try {
         throw new Exception("Acesso restrito.");
     }
 
-    // 2. BUSCAR ALUNOS (Ignora admins e equipe)
+    // 2. BUSCAR ALUNOS
     $conn = Conexao::getConexao();
-    $sql = "SELECT id, nome, email, telefone, plano, criado_em, status 
+    
+    // Adicionei 'access_token' e 'status' (caso precise reativar)
+    $sql = "SELECT id, nome, email, telefone, plano, access_token, status, criado_em 
             FROM usuarios 
             WHERE email NOT LIKE '%@techfit.adm.br%' 
             AND nivel_acesso != 'admin' 

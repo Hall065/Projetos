@@ -50,7 +50,7 @@ require_once __DIR__ . '/../Controller/AuthController.php';
       <input type="email" name="email" class="register-input" placeholder="seu@email.com" required>
 
       <label class="register-label">Telefone</label>
-      <input type="tel" name="phone" class="register-input" placeholder="(99) 99999-9999" required>
+      <input type="tel" id="novo-telefone" name="phone" class="register-input" placeholder="(99) 99999-9999" required>
 
       <label class="register-label">Senha</label>
       <div style="position: relative; width: 100%; margin-bottom: 15px;">
@@ -109,6 +109,12 @@ require_once __DIR__ . '/../Controller/AuthController.php';
         icon.style.color = '#888'; // Volta a ser cinza
       }
     }
+
+    // Máscara de Telefone (formata enquanto digita)
+    document.getElementById('novo-telefone').addEventListener('input', function(e) {
+      var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+      e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    });
   </script>
 
 </body>

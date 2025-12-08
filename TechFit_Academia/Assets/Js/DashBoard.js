@@ -30,7 +30,7 @@ let availableSchedules = [
 // ==========================================
 
 function navigateTo(sectionId) {
-    // Atualiza menu lateral
+    // 1. Atualiza visual do menu lateral
     const menuItems = document.querySelectorAll('.sidebar-item');
     menuItems.forEach(item => {
         item.classList.remove('active', 'bg-gray-800', 'border-l-4', 'border-red-500');
@@ -40,13 +40,14 @@ function navigateTo(sectionId) {
         }
     });
 
-    // Troca as seções
+    // 2. Troca as seções (Esconde todas)
     const sections = document.querySelectorAll('.content-section');
     sections.forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
     });
 
+    // 3. Mostra a seção alvo
     const target = document.getElementById(sectionId);
     if (target) {
         target.style.display = 'block';
@@ -57,14 +58,25 @@ function navigateTo(sectionId) {
         const pageTitle = document.getElementById('page-title');
         if (pageTitle) pageTitle.textContent = titles[sectionId] || 'Dashboard';
 
-        // Carregamentos específicos por aba
+        // --- CARREGAMENTOS ESPECÍFICOS POR ABA ---
+
         if (sectionId === 'treinos') loadWorkouts();
 
         if (sectionId === 'horarios') {
-            // Usa a data do filtro se existir, senão usa hoje
             const dateInput = document.getElementById('schedule-date-filter');
             const dateToLoad = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
             loadSchedules(dateToLoad);
+        }
+
+        // --- NOVIDADE: ATUALIZA O PERFIL AO ENTRAR NA ABA ---
+        if (sectionId === 'perfil') {
+            // Verifica se a variável global 'userData' já tem dados (carregados no inicio)
+            if (typeof userData !== 'undefined' && userData && typeof updateProfileStats === 'function') {
+                updateProfileStats(userData);
+            } else {
+                // Se por acaso estiver vazia, força buscar do servidor
+                fetchUserData();
+            }
         }
     }
 }
@@ -142,11 +154,57 @@ async function fetchUserData() {
         const response = await fetch('../api/get_user.php');
         if (!response.ok) throw new Error('Erro na rede');
         const data = await response.json();
+
         if (data.error) return null;
+
+        // Salva os dados na variável global para usar depois
+        userData = data;
+
+        // 1. Gera o Cartão
+        if (typeof renderAccessCard === 'function') renderAccessCard(data);
+
+        // 2. Preenche o Formulário de Edição
+        if (document.getElementById('profile-name')) document.getElementById('profile-name').value = data.nome || '';
+        if (document.getElementById('profile-email')) document.getElementById('profile-email').value = data.email || '';
+        if (document.getElementById('profile-phone')) document.getElementById('profile-phone').value = data.telefone || '';
+
+        // 3. CHAMA A ATUALIZAÇÃO DAS ESTATÍSTICAS
+        updateProfileStats(data);
+
+        // 4. carrega o Avatar se existir 
+        if (data.foto) {
+            updateAllAvatars(data.foto);
+        }
+
         return data;
     } catch (error) {
-        console.error('Erro ao buscar dados do utilizador:', error);
+        console.error('Erro ao buscar dados:', error);
         return null;
+    }
+}
+
+function updateProfileStats(data) {
+    // A. Plano Atual
+    const planEl = document.getElementById('stat-current-plan');
+    if (planEl) {
+        planEl.innerText = data.plano || 'Standard';
+    }
+
+    // B. Membro Desde (Atenção aqui!)
+    const memberEl = document.getElementById('stat-member-since');
+    if (memberEl) {
+        if (data.criado_em) {
+            // Tenta criar a data. Se falhar, usa a data atual.
+            const date = new Date(data.criado_em.replace(/-/g, '/')); // Fix para compatibilidade Safari/alguns browsers
+
+            const options = { month: 'long', year: 'numeric' };
+            const formatted = date.toLocaleDateString('pt-BR', options);
+
+            // "dezembro de 2024" -> "Dezembro de 2024"
+            memberEl.innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        } else {
+            memberEl.innerText = "Recente";
+        }
     }
 }
 
@@ -156,30 +214,30 @@ async function loadDashboardStats() {
         const stats = await response.json();
 
         if (stats && !stats.error) {
-            // Cards Padrão
+            // --- ATUALIZA A TELA INICIAL (DASHBOARD) ---
             if (document.getElementById('stat-monthly-workouts')) document.getElementById('stat-monthly-workouts').innerText = stats.monthlyWorkouts;
             if (document.getElementById('stat-next-workout')) document.getElementById('stat-next-workout').innerText = stats.nextWorkout;
             if (document.getElementById('stat-next-workout-type')) document.getElementById('stat-next-workout-type').innerText = stats.nextWorkoutType;
             if (document.getElementById('stat-calories')) document.getElementById('stat-calories').innerText = stats.calories;
 
-            // --- ATUALIZA A SEQUÊNCIA (STREAK) NOS DOIS LUGARES ---
-
-            // 1. No Card Principal (Topo da página)
-            if (document.getElementById('stat-streak')) {
-                document.getElementById('stat-streak').innerText = stats.streak;
-            }
-
-            // 2. Na Barra Lateral (Sidebar esquerda)
-            if (document.getElementById('sidebar-streak')) {
-                document.getElementById('sidebar-streak').innerText = `${stats.streak} dias`;
-            }
-
-            // Aba Perfil
+            if (document.getElementById('stat-streak')) document.getElementById('stat-streak').innerText = stats.streak;
+            if (document.getElementById('sidebar-streak')) document.getElementById('sidebar-streak').innerText = `${stats.streak} dias`;
             if (document.getElementById('stat-total-workouts')) document.getElementById('stat-total-workouts').innerText = stats.totalWorkouts;
+
+            // --- ATUALIZA A ABA PERFIL ---
+            if (document.getElementById('stat-total-workouts-profile')) {
+                // MUDANÇA AQUI: Antes era stats.totalWorkouts, agora é stats.monthlyWorkouts
+                document.getElementById('stat-total-workouts-profile').innerText = stats.monthlyWorkouts || 0;
+            }
+
+            // Frequência
+            if (document.getElementById('stat-weekly-frequency')) {
+                const total = parseInt(stats.monthlyWorkouts || 0);
+                const freq = total > 0 ? (total / 4).toFixed(1) : "0";
+                document.getElementById('stat-weekly-frequency').innerText = `${freq} dias/sem`;
+            }
         }
-    } catch (e) {
-        console.error("Erro ao carregar estatísticas", e);
-    }
+    } catch (e) { console.error("Erro stats", e); }
 }
 
 async function loadNotifications() {
@@ -273,9 +331,8 @@ async function loadAppointments() {
                                     ${item.status.toUpperCase()}
                                 </span>
                                 ${item.status !== 'cancelado' ? `
-                                <button onclick="cancelAppointment(${item.id})" class="text-red-400 hover:text-red-600 ml-2 hover:bg-gray-700 p-2 rounded-full transition-colors" title="Cancelar Treino">
-                                    <i class="fas fa-times-circle text-xl"></i>
-                                </button>` : ''}
+                                <button onclick="cancelAppointment(${item.id})" class="text-red-400 hover:text-red-600 ml-2 hover:bg-gray-700 p-2 rounded-lg transition-colors" title="Cancelar Agendamento">
+                                    <i class="fas fa-trash-alt text-xl"></i> </button>` : ''}
                             </div>
                         </div>
                     `;
@@ -588,13 +645,57 @@ async function handleWorkoutSubmit(event) {
     } catch (e) { alert('Erro na conexão.'); }
 }
 
-async function deleteWorkout(id) {
-    if (!confirm('Tem certeza que deseja apagar este plano de treino?')) return;
+// Função para o ALUNO apagar o PRÓPRIO treino
+window.deleteWorkout = async function (id) {
+    const result = await Swal.fire({
+        title: 'Apagar Treino?',
+        text: "Você tem certeza? Isso removerá o treino da sua lista.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#4b5563',
+        confirmButtonText: 'Sim, apagar',
+        cancelButtonText: 'Cancelar',
+        background: '#1f2937', color: '#fff'
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
-        await fetch('../api/delete_treino.php', { method: 'POST', body: JSON.stringify({ id: id }) });
-        loadWorkouts();
-    } catch (e) { console.error(e); }
-}
+        // MUDANÇA AQUI: Aponta para a API do ALUNO, não do Admin
+        const response = await fetch('../api/aluno_delete_workout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Apagado!',
+                showConfirmButton: false,
+                timer: 1500,
+                background: '#1f2937', color: '#fff'
+            });
+
+            // Atualiza a lista na tela
+            if (typeof loadWorkouts === 'function') loadWorkouts();
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: data.error || 'Não foi possível apagar.',
+                background: '#1f2937', color: '#fff'
+            });
+        }
+    } catch (e) {
+        console.error(e);
+        Swal.fire({ icon: 'error', title: 'Erro', text: 'Erro de conexão.', background: '#1f2937', color: '#fff' });
+    }
+};
 
 async function saveProfile() {
     const name = document.getElementById('input-fullname').value;
@@ -647,52 +748,69 @@ async function saveProfile() {
 }
 
 async function cancelAppointment(id) {
-    // Pergunta se quer cancelar
-    const result = await SwalMixin.fire({
+    // 1. Pergunta BONITA (SweetAlert)
+    const result = await Swal.fire({
         title: 'Cancelar Agendamento?',
-        text: "O horário ficará livre novamente.",
+        text: "O horário ficará livre para outro aluno.",
         icon: 'warning',
         showCancelButton: true,
+        confirmButtonColor: '#dc2626', // Vermelho
+        cancelButtonColor: '#4b5563',  // Cinza
         confirmButtonText: 'Sim, cancelar!',
-        cancelButtonText: 'Não, manter'
+        cancelButtonText: 'Manter',
+        background: '#1f2937', // Tema Escuro
+        color: '#fff'
     });
 
-    // Se o usuário clicou em SIM
-    if (result.isConfirmed) {
-        try {
-            await fetch('../api/cancel_agendamento.php', {
-                method: 'POST',
-                body: JSON.stringify({ id })
-            });
+    // Se desistir, para aqui.
+    if (!result.isConfirmed) return;
 
-            // Sucesso
-            SwalMixin.fire({
-                icon: 'success',
-                title: 'Cancelado',
-                timer: 1500,
-                showConfirmButton: false
-            });
+    // 2. Processa o cancelamento
+    try {
+        const response = await fetch('../api/cancel_agendamento.php', {
+            method: 'POST',
+            body: JSON.stringify({ id })
+        });
+        const data = await response.json(); // É bom ler o JSON de resposta
 
-            // Atualiza a tela
-            loadAppointments();
-            loadDashboardStats();
-            loadNotifications();
-            const scheduleFilter = document.getElementById('schedule-date-filter');
-            if (scheduleFilter) loadSchedules(scheduleFilter.value);
+        // Sucesso
+        Swal.fire({
+            icon: 'success',
+            title: 'Cancelado!',
+            text: 'Seu agendamento foi removido.',
+            timer: 1500,
+            showConfirmButton: false,
+            background: '#1f2937', color: '#fff'
+        });
 
-        } catch (e) {
-            SwalMixin.fire({ icon: 'error', title: 'Erro', text: 'Erro ao cancelar.' });
-        }
+        // 3. Atualiza tudo na tela
+        loadAppointments();
+        loadDashboardStats();
+
+        // Se tiver a função de carregar notificações, chama também
+        if (typeof loadNotifications === 'function') loadNotifications();
+
+        // Se estiver na aba de horários, atualiza ela também
+        const scheduleFilter = document.getElementById('schedule-date-filter');
+        if (scheduleFilter) loadSchedules(scheduleFilter.value);
+
+    } catch (e) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Não foi possível cancelar o agendamento.',
+            background: '#1f2937', color: '#fff'
+        });
     }
 }
 
 async function deleteNotification(id) {
     try {
-        await fetch('../api/delete_notificacao.php', { 
-            method: 'POST', 
-            body: JSON.stringify({ id: id }) 
+        await fetch('../api/delete_notificacao.php', {
+            method: 'POST',
+            body: JSON.stringify({ id: id })
         });
-        
+
         // Atualiza a lista
         loadNotifications();
 
@@ -707,15 +825,15 @@ async function deleteNotification(id) {
             background: '#1f2937', // Combina com seu tema escuro
             color: '#ffffff'
         });
-        
+
         Toast.fire({
             icon: 'success',
             title: 'Notificação removida'
         });
         // ----------------------------------------------------
 
-    } catch (e) { 
-        console.error("Erro ao apagar notificação", e); 
+    } catch (e) {
+        console.error("Erro ao apagar notificação", e);
     }
 }
 
@@ -890,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ==================================================
 // REDE DE SEGURANÇA: Substitui alerts nativos
 // ==================================================
-window.alert = function(message) {
+window.alert = function (message) {
     SwalMixin.fire({
         title: 'Aviso',
         text: message,
@@ -898,3 +1016,204 @@ window.alert = function(message) {
         confirmButtonText: 'OK'
     });
 };
+
+// --- FUNÇÕES DO TECHFIT PASS ---
+
+function renderAccessCard(user) {
+    // 1. Preenche o Cartão Visual
+    document.getElementById('card-name').innerText = user.nome;
+    document.getElementById('card-token').innerText = user.access_token || '---';
+    document.getElementById('card-plan').innerText = user.plano || 'STANDARD';
+
+    // (Futuro) Se tiver foto, esconde o ícone e mostra a img
+    // if(user.foto) { ... }
+
+    // 2. Gera o QR Code
+    const qrContainer = document.getElementById("qrcode");
+    if (qrContainer) {
+        qrContainer.innerHTML = ""; // Limpa anterior para não duplicar
+
+        if (user.access_token) {
+            new QRCode(qrContainer, {
+                text: user.access_token, // O valor do código
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    }
+}
+
+function switchAccessMethod(method) {
+    const tabQr = document.getElementById('tab-qr');
+    const tabBio = document.getElementById('tab-bio');
+    const viewQr = document.getElementById('view-qr');
+    const viewBio = document.getElementById('view-bio');
+
+    if (method === 'qr') {
+        // Ativa QR
+        tabQr.classList.add('bg-gray-700', 'text-white');
+        tabQr.classList.remove('text-gray-400');
+        tabBio.classList.remove('bg-gray-700', 'text-white');
+        tabBio.classList.add('text-gray-400');
+
+        viewQr.classList.remove('hidden');
+        viewBio.classList.add('hidden');
+    } else {
+        // Ativa Bio
+        tabBio.classList.add('bg-gray-700', 'text-white');
+        tabBio.classList.remove('text-gray-400');
+        tabQr.classList.remove('bg-gray-700', 'text-white');
+        tabQr.classList.add('text-gray-400');
+
+        viewBio.classList.remove('hidden');
+        viewQr.classList.add('hidden');
+    }
+}
+
+// ==========================================
+// LISTA DE AVATARES (AGORA COM LINKS DA WEB)
+// ==========================================
+const AVATAR_URLS = {
+    // Exemplo usando o serviço DiceBear (Estilo Lorelei)
+    'link_m1': 'https://i.pinimg.com/736x/06/73/9a/06739a02c706bb556a41ad28652db9f5.jpg',
+    'link_m2': 'https://i.pinimg.com/736x/df/7d/7f/df7d7f7f15bdb2268632822ac84c0af7.jpg',
+    'link_m3': 'https://i.pinimg.com/736x/28/c2/00/28c200e6fa47b2b32ddf1d9b0039b0da.jpg',
+    'link_f1': 'https://i.pinimg.com/736x/b9/d6/b1/b9d6b17c242c508554cd2878b19948a5.jpg',
+    'link_f2': 'https://i.pinimg.com/736x/c3/f7/ce/c3f7ce65b67fcad662d3df0d8b7a4342.jpg',
+    'link_f3': 'https://i.pinimg.com/736x/17/3c/f6/173cf657e72bc485ec980d82cafc6b1a.jpg',
+    // Adicione mais links aqui...
+};
+
+// Helper AGORA MUITO MAIS SIMPLES: Apenas retorna o URL
+function getAvatarSrc(avatarKey) {
+    // A chave é o nome que salvamos no DB (ex: 'link_m1')
+    // Se não achar, retorna null para o fallback do ícone.
+    return AVATAR_URLS[avatarKey] || null;
+}
+
+// ==========================================
+// LÓGICA DE AVATARES
+// ==========================================
+
+function openAvatarModal() {
+    const grid = document.getElementById('avatar-grid');
+    grid.innerHTML = ''; // Limpa
+
+    // Itera sobre a nova lista de URLs
+    for (const [key, url] of Object.entries(AVATAR_URLS)) {
+        // Verifica qual é o atual para marcar (key é o que está no DB)
+        const isSelected = userData.foto === key ? 'border-red-500 bg-gray-800' : 'border-gray-700 hover:border-gray-500';
+
+        const div = document.createElement('div');
+        div.className = `cursor-pointer rounded-xl p-4 border-2 ${isSelected} transition-all flex flex-col items-center group`;
+        div.onclick = () => saveAvatar(key); // A chave é o ID salvo no DB
+
+        // MUDANÇA PRINCIPAL: Usamos a tag <img> com a URL
+        div.innerHTML = `
+            <div class="w-20 h-20 mb-2 transform group-hover:scale-110 transition-transform rounded-full overflow-hidden">
+                <img src="${url}" alt="Avatar ${key}" class="w-full h-full object-cover"/>
+            </div>
+            <p class="text-gray-400 text-xs group-hover:text-white">${key.includes('m') ? 'Masculino' : 'Feminino'}</p>
+        `;
+        grid.appendChild(div);
+    }
+
+    document.getElementById('avatar-modal').classList.remove('hidden');
+}
+
+async function saveAvatar(avatarKey) {
+    // Feedback visual imediato (loading)
+    Swal.fire({
+        title: 'Salvando...',
+        didOpen: () => Swal.showLoading(),
+        background: '#1f2937', color: '#fff'
+    });
+
+    try {
+        const response = await fetch('../api/update_avatar.php', {
+            method: 'POST',
+            // É importante garantir o Content-Type
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ avatar: avatarKey })
+        });
+
+        // --- MUDANÇA 1: Lendo como texto primeiro para evitar erro de JSON inválido ---
+        const text = await response.text();
+        let result;
+
+        try {
+            result = JSON.parse(text);
+        } catch (err) {
+            // Se o PHP soltar um Warning ou erro antes do JSON, isso captura o erro.
+            throw new Error("Erro de sintaxe no servidor (não é JSON). Resposta: " + text.substring(0, 100) + "...");
+        }
+        // --- FIM MUDANÇA 1 ---
+
+        if (result.success) {
+            // Atualiza localmente sem reload
+            userData.foto = avatarKey;
+            updateAllAvatars(avatarKey);
+            document.getElementById('avatar-modal').classList.add('hidden');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Atualizado!',
+                text: 'Seu novo avatar foi definido.',
+                timer: 1500,
+                showConfirmButton: false,
+                background: '#1f2937', color: '#fff'
+            });
+        } else {
+            // Lança o erro retornado pelo PHP (que agora tem o erro SQL real)
+            throw new Error(result.error);
+        }
+    } catch (e) {
+        // --- MUDANÇA 2: Mostrar a mensagem de erro real (e.message) ---
+        console.error("Erro ao salvar avatar:", e);
+        Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            // Agora mostra a mensagem detalhada (Erro SQL, ID não encontrado, etc.)
+            text: e.message || 'Erro desconhecido. Verifique o console.',
+            background: '#1f2937', color: '#fff'
+        });
+    }
+}
+
+// Função poderosa que atualiza TODAS as fotos na tela (Header, TechFit Pass, Form)
+function updateAllAvatars(avatarKey) {
+    const src = getAvatarSrc(avatarKey);
+    // Se não tiver chave ou SVG, usa o fallback
+    if (!src) {
+        // Lógica de fallback para quando a chave é nula (se desejar limpar)
+        ['profile-edit-img', 'card-user-photo', 'header-user-photo'].forEach(id => {
+            const img = document.getElementById(id);
+            const icon = document.getElementById(id.replace('img', 'icon').replace('photo', 'icon'));
+            if (img) img.classList.add('hidden');
+            if (icon) icon.classList.remove('hidden');
+        });
+        return;
+    }
+
+    // Lista de IDs de imagens para atualizar
+    // ATENÇÃO AQUI: 'header-user-photo' é o novo ID que adicionamos
+    const imgIds = ['profile-edit-img', 'card-user-photo', 'header-user-photo'];
+
+    imgIds.forEach(id => {
+        const img = document.getElementById(id);
+
+        // Pega o ID do ícone de fallback (ex: 'profile-edit-icon', 'header-user-icon')
+        // Substituímos a parte final do ID para achar o ícone de placeholder
+        const iconId = id.includes('img') ? id.replace('img', 'icon') : id.replace('photo', 'icon');
+        const icon = document.getElementById(iconId);
+
+        if (img) {
+            img.src = src;
+            img.classList.remove('hidden'); // Mostra a imagem
+        }
+        if (icon) icon.classList.add('hidden'); // Esconde o ícone de placeholder
+    });
+}

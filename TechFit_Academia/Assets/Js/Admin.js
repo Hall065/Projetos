@@ -321,17 +321,17 @@ document.getElementById('modal-editar').addEventListener('click', (e) => {
 function deletarAluno(id) {
     // Grava o ID no input hidden do HTML
     const inputId = document.getElementById('id-para-excluir');
-    if(inputId) {
+    if (inputId) {
         inputId.value = id;
     } else {
         console.error("ERRO: Não achei o input 'id-para-excluir' no HTML");
         return;
     }
-    
+
     // Abre o modal visualmente
     const modal = document.getElementById('modal-confirmar-exclusao');
     const content = document.getElementById('modal-exclusao-content');
-    
+
     modal.classList.remove('hidden');
     setTimeout(() => {
         modal.classList.remove('opacity-0');
@@ -344,7 +344,7 @@ function deletarAluno(id) {
 async function confirmarExclusaoDefinitiva() {
     // Pega o ID que salvamos antes
     const id = document.getElementById('id-para-excluir').value;
-    
+
     // Fecha o modal de pergunta
     fecharModalExclusao();
 
@@ -373,11 +373,11 @@ async function confirmarExclusaoDefinitiva() {
 function fecharModalExclusao() {
     const modal = document.getElementById('modal-confirmar-exclusao');
     const content = document.getElementById('modal-exclusao-content');
-    
+
     modal.classList.add('opacity-0');
     content.classList.remove('scale-100');
     content.classList.add('scale-90');
-    
+
     setTimeout(() => {
         modal.classList.add('hidden');
     }, 300);
@@ -449,10 +449,29 @@ function abrirModalNovo() {
 document.getElementById('form-novo-aluno').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // 1. CAPTURA AS SENHAS SEPARADAMENTE
+    const senha = document.getElementById('novo-senha').value;
+    const confirmaSenha = document.getElementById('novo-confirma-senha').value;
+
+    // 2. VALIDAÇÃO DE IGUALDADE (AQUI É A NOVIDADE)
+    if (senha !== confirmaSenha) {
+        // Usa o SweetAlert para avisar
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atenção',
+            text: 'A senha inicial e a confirmação não conferem!',
+            background: '#1f2937', // Mantendo o tema escuro
+            color: '#fff',
+            confirmButtonColor: '#dc2626'
+        });
+        return; // <--- IMPEDE O ENVIO (O código para aqui)
+    }
+
+    // 3. SE PASSOU, MONTA O OBJETO
     const dados = {
         nome: document.getElementById('novo-nome').value,
         email: document.getElementById('novo-email').value,
-        password: document.getElementById('novo-senha').value, // <--- O PULO DO GATO
+        password: senha, // Manda a senha validada
         telefone: document.getElementById('novo-telefone').value,
         plano: document.getElementById('novo-plano').value,
         status: document.getElementById('novo-status').value
@@ -468,16 +487,41 @@ document.getElementById('form-novo-aluno').addEventListener('submit', async (e) 
 
         if (result.success) {
             document.getElementById('modal-novo').classList.add('hidden');
-            carregarAlunos();
-            loadAdminStats();
-            mostrarSucesso('Novo aluno cadastrado com sucesso!');
+
+            // Limpa os campos do formulário para o próximo uso
+            document.getElementById('form-novo-aluno').reset();
+
+            // Se você tiver a função carregarAlunos(), chama ela
+            if (typeof carregarAlunos === 'function') carregarAlunos();
+            if (typeof loadAdminStats === 'function') loadAdminStats();
+
+            // Sucesso com SweetAlert
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Novo aluno cadastrado.',
+                timer: 2000,
+                showConfirmButton: false,
+                background: '#1f2937', color: '#fff'
+            });
+
         } else {
-            // Substituímos o alert pelo Modal de Erro
-            mostrarErro(result.error || 'Erro desconhecido ao cadastrar.');
+            // Erro vindo da API (ex: email já existe)
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: result.error || 'Erro desconhecido ao cadastrar.',
+                background: '#1f2937', color: '#fff'
+            });
         }
     } catch (error) {
         console.error(error);
-        mostrarErro('Erro de conexão com o servidor.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro de Conexão',
+            text: 'Não foi possível contatar o servidor.',
+            background: '#1f2937', color: '#fff'
+        });
     }
 });
 
@@ -690,7 +734,7 @@ const dropdownAlunos = document.getElementById('dropdown-alunos');
 if (inputBuscaTreino) {
     inputBuscaTreino.addEventListener('keyup', async (e) => {
         const termo = e.target.value;
-        
+
         if (termo.length < 2) {
             dropdownAlunos.classList.add('hidden');
             return;
@@ -701,7 +745,7 @@ if (inputBuscaTreino) {
             const alunos = await response.json();
 
             dropdownAlunos.innerHTML = '';
-            
+
             if (alunos.length > 0) {
                 dropdownAlunos.classList.remove('hidden');
                 alunos.forEach(aluno => {
@@ -757,7 +801,7 @@ async function selecionarAlunoTreino(id) {
 
             // Renderiza Treinos
             grid.innerHTML = '';
-            
+
             if (data.treinos.length === 0) {
                 grid.innerHTML = `<div class="col-span-3 text-center py-10 text-gray-500 border border-gray-700 border-dashed rounded-xl">Nenhum treino cadastrado para este aluno.</div>`;
                 return;
@@ -766,7 +810,7 @@ async function selecionarAlunoTreino(id) {
             data.treinos.forEach(treino => {
                 // Tratamento para quebras de linha na descrição para exibir bonito no HTML
                 const descFormatada = treino.descricao.replace(/\n/g, '<br>');
-                
+
                 const card = document.createElement('div');
                 card.className = 'card-gradient p-5 rounded-xl border border-gray-700 hover:border-red-500/50 transition-all shadow-lg group relative';
                 card.innerHTML = `
@@ -857,52 +901,68 @@ document.getElementById('form-treino').addEventListener('submit', async (e) => {
 });
 
 // 7. Deletar Treino
-function deletarTreino(id) {
-    // Reutilizamos o modal de exclusão global que já criamos para alunos!
-    // Precisamos apenas mudar o comportamento do botão "Sim" temporariamente ou criar um específico.
-    // Para simplificar e manter "clean", vamos criar uma variavel global de contexto de exclusão ou um modal simples aqui mesmo.
-    // Mas vamos usar o confirm do JS customizado que fizemos antes? Vamos adaptar ele.
-    
-    // Hack rápido: Alteramos o onclick do botão de confirmação do modal global
-    document.getElementById('id-para-excluir').value = id;
-    const btnConfirmar = document.querySelector('#modal-confirmar-exclusao button.bg-red-600');
-    
-    // Guarda a função original para restaurar depois (caso use em alunos)
-    const oldOnclick = btnConfirmar.onclick; 
-    
-    // Define nova ação
-    btnConfirmar.onclick = async function() {
-        fecharModalExclusao();
-        try {
-            const response = await fetch('../api/admin_delete_workout.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
-            });
-            const result = await response.json();
-            if (result.success) {
-                mostrarSucesso('Treino removido.');
-                const alunoId = document.getElementById('treino-id-aluno-selecionado').value;
-                selecionarAlunoTreino(alunoId);
-            } else {
-                mostrarErro(result.error);
-            }
-        } catch (error) {
-            mostrarErro('Erro ao excluir.');
-        }
-        // Restaura função original (para não quebrar a aba de alunos)
-        btnConfirmar.onclick = confirmarExclusaoDefinitiva; 
-    };
+async function deletarTreino(id) {
+    // 1. CONFIRMAÇÃO VISUAL (Substitui o confirm nativo)
+    const result = await Swal.fire({
+        title: 'Tem certeza?',
+        text: "Você não poderá reverter isso! O treino será excluído permanentemente.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626', // Vermelho
+        cancelButtonColor: '#4b5563',  // Cinza
+        confirmButtonText: 'Sim, apagar!',
+        cancelButtonText: 'Cancelar',
+        background: '#1f2937', // Tema escuro
+        color: '#fff'
+    });
 
-    // Abre o modal visualmente
-    const modal = document.getElementById('modal-confirmar-exclusao');
-    const content = document.getElementById('modal-exclusao-content');
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        content.classList.remove('scale-90');
-        content.classList.add('scale-100');
-    }, 10);
+    // Se o usuário clicar em "Cancelar", para tudo.
+    if (!result.isConfirmed) return;
+
+    // 2. AÇÃO DE DELETAR
+    try {
+        const response = await fetch('../api/admin_delete_workout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            // Sucesso
+            Swal.fire({
+                icon: 'success',
+                title: 'Deletado!',
+                text: 'O treino foi removido com sucesso.',
+                background: '#1f2937',
+                color: '#fff',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // Recarrega a lista de treinos na tabela
+            // (Verifique se o nome da sua função de carregar é carregarTreinos() ou loadWorkouts())
+            if (typeof carregarTreinos === 'function') carregarTreinos();
+            if (typeof loadWorkouts === 'function') loadWorkouts();
+
+        } else {
+            // Erro da API
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: data.error || 'Não foi possível apagar o treino.',
+                background: '#1f2937', color: '#fff'
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Erro de conexão com o servidor.',
+            background: '#1f2937', color: '#fff'
+        });
+    }
 }
 
 // --- LÓGICA DE EXCLUSÃO DE TREINOS (ISOLADA) ---
@@ -910,11 +970,11 @@ function deletarTreino(id) {
 // 1. Chamado ao clicar na lixeira do CARD DE TREINO
 function deletarTreino(id) {
     document.getElementById('id-treino-para-excluir').value = id;
-    
+
     // Abre o modal específico de treino
     const modal = document.getElementById('modal-exclusao-treino');
     const content = document.getElementById('modal-exclusao-treino-content');
-    
+
     modal.classList.remove('hidden');
     setTimeout(() => {
         modal.classList.remove('opacity-0');
@@ -941,7 +1001,7 @@ async function confirmarExclusaoTreino() {
 
         if (result.success) {
             mostrarSucesso('Ficha de treino removida.');
-            
+
             // Recarrega a lista do aluno que está aberto na tela
             const alunoId = document.getElementById('treino-id-aluno-selecionado').value;
             selecionarAlunoTreino(alunoId);
@@ -952,3 +1012,98 @@ async function confirmarExclusaoTreino() {
         mostrarErro('Erro de conexão.');
     }
 }
+
+// Máscara de Telefone (formata enquanto digita)
+document.getElementById('novo-telefone').addEventListener('input', function (e) {
+    var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+    e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+});
+
+// Função para o olhinho funcionar
+function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+
+    // Verifica se o input foi encontrado para evitar erros
+    if (!input) {
+        console.error('Input não encontrado: ' + inputId);
+        return;
+    }
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        icon.classList.add('text-red-500'); // Fica vermelho
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        icon.classList.remove('text-red-500'); // Fica cinza
+    }
+}
+
+// Função chamada pelo botão <button onclick="deleteWorkout(...)">
+window.deleteWorkout = async function (id) {
+    // 1. CONFIRMAÇÃO COM SWEETALERT
+    const result = await Swal.fire({
+        title: 'Excluir Treino?',
+        text: "Essa ação não pode ser desfeita e removerá este treino da lista.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626', // Vermelho
+        cancelButtonColor: '#4b5563',  // Cinza
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar',
+        background: '#1f2937', // Tema escuro
+        color: '#fff'
+    });
+
+    // Se cancelar, para aqui
+    if (!result.isConfirmed) return;
+
+    // 2. ENVIA PARA A API
+    try {
+        const response = await fetch('../api/admin_delete_workout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // 3. SUCESSO
+            Swal.fire({
+                icon: 'success',
+                title: 'Excluído!',
+                text: 'O treino foi removido com sucesso.',
+                timer: 1500,
+                showConfirmButton: false,
+                background: '#1f2937', color: '#fff'
+            });
+
+            // 4. RECARREGA A LISTA NA TELA
+            // Tenta achar a função que carrega a lista. Geralmente é uma dessas:
+            if (typeof loadWorkouts === 'function') loadWorkouts();
+            else if (typeof carregarTreinos === 'function') carregarTreinos();
+            else location.reload(); // Último caso: recarrega a página
+
+        } else {
+            // ERRO DA API
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: data.error || 'Não foi possível excluir.',
+                background: '#1f2937', color: '#fff'
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Falha na conexão com o servidor.',
+            background: '#1f2937', color: '#fff'
+        });
+    }
+};

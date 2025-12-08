@@ -38,6 +38,7 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body class="bg-gray-900 text-white min-h-screen">
@@ -45,18 +46,18 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
   <div class="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-gray-900 to-gray-800 shadow-2xl z-50 border-r border-gray-700">
     <!-- Logo -->
     <div class="p-6 border-b border-gray-700">
-  <a href="Principal.php" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-300 group">
-    
-    <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-red-900/50 transition-all">
-      <i class="fas fa-dumbbell text-white text-xl"></i>
+      <a href="Principal.php" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-300 group">
+
+        <div class="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-red-900/50 transition-all">
+          <i class="fas fa-dumbbell text-white text-xl"></i>
+        </div>
+
+        <div>
+          <h1 class="text-2xl font-bold text-white">TechFit</h1>
+          <p class="text-xs text-gray-400">Fitness Pro</p>
+        </div>
+      </a>
     </div>
-    
-    <div>
-      <h1 class="text-2xl font-bold text-white">TechFit</h1>
-      <p class="text-xs text-gray-400">Fitness Pro</p>
-    </div>
-  </a>
-</div>
 
     <!-- Menu Items -->
     <nav class="mt-6 px-3">
@@ -154,8 +155,9 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
           <!-- Perfil Dropdown -->
           <div class="relative">
             <button id="profile-btn" class="flex items-center space-x-3 hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors focus:outline-none">
-              <div class="w-11 h-11 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center shadow-lg ring-2 ring-red-500 ring-opacity-50">
-                <i class="fas fa-user text-white"></i>
+              <div class="w-10 h-10 rounded-full bg-gray-700 overflow-hidden flex items-center justify-center">
+                <img id="header-user-photo" src="" class="w-full h-full object-cover hidden">
+                <i id="header-user-icon" class="fas fa-user text-xl text-gray-400"></i>
               </div>
               <div class="text-left">
                 <p class="font-semibold" id="header-user-name"><?= $_SESSION['user']['nome'] ?? 'Usuário' ?></p>
@@ -358,7 +360,6 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
             Meus Planos de Treino
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="workout-plans">
-            <!-- Serão carregados via JavaScript -->
           </div>
         </div>
       </div>
@@ -393,62 +394,147 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
       </div>
 
       <!-- Perfil Section -->
-      <div id="perfil" class="content-section">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="card-gradient rounded-xl p-6">
-            <h3 class="text-2xl font-bold mb-6 flex items-center">
-              <i class="fas fa-user-edit text-blue-500 mr-3"></i>
-              Informações Pessoais
-            </h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-gray-400 mb-2 font-medium">Nome Completo</label>
-                <input type="text" id="input-fullname"
-                  value="<?= $_SESSION['user']['nome'] ?>"
-                  class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
-              </div>
+      <div id="perfil" class="content-section" style="display: none;">
 
-              <div>
-                <label class="block text-gray-400 mb-2 font-medium">Email</label>
-                <input type="email" id="input-email"
-                  value="<?= $_SESSION['user']['email'] ?>"
-                  class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
-              </div>
+        <div class="card-gradient rounded-xl p-6 mb-6">
+          <h3 class="text-2xl font-bold mb-6 flex items-center">
+            <i class="fas fa-id-card text-red-500 mr-3"></i>TechFit Pass
+          </h3>
 
-              <div>
-                <label class="block text-gray-400 mb-2 font-medium">Telefone</label>
-                <input type="tel" id="input-phone"
-                  value="<?= $_SESSION['user']['telefone'] ?>"
-                  class="w-full bg-gray-800 p-3 rounded-lg text-white border border-gray-700 focus:border-red-500 focus:outline-none transition-colors">
+          <div class="flex flex-col xl:flex-row gap-8 items-center justify-center">
+
+            <div class="relative w-full max-w-sm h-56 bg-gradient-to-r from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden border border-gray-700 group transition-transform hover:scale-[1.02] flex-shrink-0">
+              <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-red-600 rounded-full opacity-20 blur-xl"></div>
+              <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-red-600 rounded-full opacity-10 blur-xl"></div>
+
+              <div class="relative p-6 h-full flex flex-col justify-between z-10">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h2 class="text-white font-bold text-lg italic tracking-wider">TECHFIT</h2>
+                    <p class="text-xs text-red-500 font-bold tracking-widest">MEMBER ACCESS</p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full border-2 border-red-600 bg-gray-800 overflow-hidden flex items-center justify-center">
+                    <img id="card-user-photo" src="" class="w-full h-full object-cover hidden">
+                    <i id="card-user-icon" class="fas fa-user text-xl text-gray-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-gray-400 text-xs uppercase mb-1">Aluno(a)</p>
+                  <p class="text-white font-bold text-lg truncate" id="card-name">Carregando...</p>
+                </div>
+                <div class="flex justify-between items-end">
+                  <div>
+                    <p class="text-gray-400 text-xs">ID / Token</p>
+                    <p class="text-white font-mono text-sm tracking-widest" id="card-token">•••• ••••</p>
+                  </div>
+                  <div class="text-right">
+                    <span class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded uppercase" id="card-plan">--</span>
+                  </div>
+                </div>
               </div>
-              <button class="action-btn w-full py-3 rounded-xl font-medium shadow-lg">
-                <i class="fas fa-save mr-2"></i>Salvar Alterações
-              </button>
             </div>
+
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex-1 w-full max-w-sm flex flex-col items-center justify-center shadow-lg min-h-[224px]">
+              <div class="flex space-x-4 mb-6 bg-gray-900 p-1 rounded-lg">
+                <button onclick="switchAccessMethod('qr')" id="tab-qr" class="px-4 py-1 rounded-md text-sm font-bold bg-gray-700 text-white transition-all">QR Code</button>
+                <button onclick="switchAccessMethod('bio')" id="tab-bio" class="px-4 py-1 rounded-md text-sm font-bold text-gray-400 hover:text-white transition-all">Digital</button>
+              </div>
+
+              <div id="view-qr" class="flex flex-col items-center animate-fade-in">
+                <div class="p-2 bg-white rounded-lg">
+                  <div id="qrcode"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-3">Aproxime da catraca</p>
+              </div>
+
+              <div id="view-bio" class="hidden flex flex-col items-center animate-fade-in">
+                <div class="relative w-32 h-32 flex items-center justify-center">
+                  <div class="absolute inset-0 bg-red-500 opacity-20 rounded-full animate-ping"></div>
+                  <i class="fas fa-fingerprint text-6xl text-red-500 animate-pulse"></i>
+                </div>
+                <p class="text-xs text-gray-400 mt-3">Use o leitor biométrico</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <div class="card-gradient rounded-xl p-6">
+            <h3 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-user-edit text-red-500 mr-3"></i>Editar Perfil</h3>
+            <form id="profile-form" class="space-y-4">
+              <div class="flex flex-col items-center mb-6">
+                <div class="relative group cursor-pointer" onclick="openAvatarModal()">
+                  <div class="w-24 h-24 rounded-full border-4 border-gray-700 bg-gray-800 overflow-hidden shadow-xl group-hover:border-red-500 transition-all flex items-center justify-center">
+                    <img id="profile-edit-img" src="" class="w-full h-full object-cover hidden">
+                    <i id="profile-edit-icon" class="fas fa-user text-3xl text-gray-400"></i>
+                  </div>
+
+                  <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="fas fa-camera text-white"></i>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Clique para alterar</p>
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1 text-sm">Nome Completo</label>
+                <input type="text" id="profile-name" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-red-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1 text-sm">Email</label>
+                <input type="email" id="profile-email" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-gray-500 cursor-not-allowed" disabled>
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1 text-sm">Telefone</label>
+                <input type="tel" id="profile-phone" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-red-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1 text-sm">Nova Senha</label>
+                <input type="password" id="profile-password" placeholder="Deixe em branco para manter" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-red-500 outline-none">
+              </div>
+              <div class="pt-4">
+                <button type="button" id="btn-save-profile" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-900/30">
+                  Salvar Alterações
+                </button>
+              </div>
+            </form>
           </div>
 
           <div class="card-gradient rounded-xl p-6">
-            <h3 class="text-2xl font-bold mb-6 flex items-center">
-              <i class="fas fa-chart-bar text-purple-500 mr-3"></i>
-              Estatísticas
-            </h3>
+            <h3 class="text-2xl font-bold mb-6 flex items-center"><i class="fas fa-chart-bar text-purple-500 mr-3"></i>Estatísticas</h3>
             <div class="space-y-4">
               <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
                 <span class="text-gray-400"><i class="fas fa-calendar-alt mr-2"></i>Membro desde:</span>
-                <span class="font-bold" id="stat-member-since">Janeiro 2024</span>
+                <span class="font-bold capitalize" id="stat-member-since">--</span>
               </div>
               <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
-                <span class="text-gray-400"><i class="fas fa-dumbbell mr-2"></i>Total de treinos:</span>
-                <span class="font-bold" id="stat-total-workouts">156</span>
+                <span class="text-gray-400"><i class="fas fa-dumbbell mr-2"></i>Treinos este mês:</span>
+                <span class="font-bold" id="stat-total-workouts-profile">0</span>
               </div>
               <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
-                <span class="text-gray-400"><i class="fas fa-chart-line mr-2"></i>Frequência semanal:</span>
-                <span class="font-bold" id="stat-weekly-frequency">4.2 dias</span>
+                <span class="text-gray-400"><i class="fas fa-chart-line mr-2"></i>Frequência estimada:</span>
+                <span class="font-bold" id="stat-weekly-frequency">--</span>
               </div>
               <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
                 <span class="text-gray-400"><i class="fas fa-star mr-2"></i>Plano atual:</span>
-                <span class="font-bold text-red-500" id="stat-current-plan">Premium</span>
+                <span class="font-bold text-red-500 uppercase" id="stat-current-plan">--</span>
               </div>
+            </div>
+          </div>
+
+          <div id="avatar-modal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center backdrop-blur-sm">
+            <div class="bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative">
+
+              <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+                <h3 class="text-xl font-bold text-white"><i class="fas fa-user-circle text-red-500 mr-2"></i>Escolha seu Avatar</h3>
+                <button onclick="document.getElementById('avatar-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                  <i class="fas fa-times text-xl"></i>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto custom-scrollbar p-2" id="avatar-grid">
+              </div>
+
             </div>
           </div>
         </div>
