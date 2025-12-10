@@ -6,7 +6,7 @@ class Conexao {
     private $host = "localhost";
     private $dbname = "techfit";
     private $user = "root";
-    private $pass = "senaisp";
+    private $pass = "SenaiSP";
 
     // 2. Compatibilidade Legada ($db->conn)
     public $conn; 
