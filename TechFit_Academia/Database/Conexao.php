@@ -3,7 +3,7 @@
 
 class Conexao {
     // 1. Configurações do Banco (CENTRALIZADAS)
-    private $host = "localhost";
+    private $host = "localhost"; //http://localhost/TechFit_Academia/View/Principal.php
     private $dbname = "techfit";
     private $user = "root";
     private $pass = "SenaiSP";
