@@ -488,10 +488,6 @@ if (isset($_SESSION['nivel']) && $_SESSION['nivel'] === 'admin') {
                 <label class="block text-gray-400 mb-1 text-sm">Telefone</label>
                 <input type="tel" id="profile-phone" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-red-500 outline-none">
               </div>
-              <div>
-                <label class="block text-gray-400 mb-1 text-sm">Nova Senha</label>
-                <input type="password" id="profile-password" placeholder="Deixe em branco para manter" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-red-500 outline-none">
-              </div>
               <div class="pt-4">
                 <button type="button" id="btn-save-profile" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-900/30">
                   Salvar Alterações

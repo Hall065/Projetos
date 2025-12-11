@@ -6,11 +6,7 @@ class Conexao {
     private $host = "localhost"; //http://localhost/TechFit_Academia/View/Principal.php
     private $dbname = "techfit";
     private $user = "root";
-<<<<<<< HEAD
     private $pass = "cada2110";
-=======
-    private $pass = "SenaiSP";
->>>>>>> 709d347daad4d8cf573cdc5e323a28931b913935
 
     // 2. Compatibilidade Legada ($db->conn)
     public $conn; 
