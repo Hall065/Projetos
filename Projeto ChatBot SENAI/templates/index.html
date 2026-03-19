@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoreBot — Análise de Crédito com IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+    </button>
+
+    <!-- ===================================================== -->
+    <!-- LANDING PAGE                                          -->
+    <!-- ===================================================== -->
+    <div class="page landing-page" id="landingPage">
+
+        <div class="landing-bg-glow"></div>
+        <div class="landing-bg-grid"></div>
+
+        <section class="hero-section">
+            <div class="hero-left">
+
+                <div class="landing-badge">
+                    <span class="badge-dot"></span>
+                    IA ativa · Análise em tempo real
+                </div>
+
+                <h1 class="landing-title">
+                    Descubra o seu<br>
+                    <span class="title-highlight">Score Real</span><br>
+                    em minutos
+                </h1>
+
+                <p class="landing-subtitle">
+                    O ScoreBot analisa seu perfil financeiro com inteligência artificial e entrega um diagnóstico completo com limite sugerido e plano de ação personalizado.
+                </p>
+
+                <div class="hero-cta-group">
+                    <button class="landing-cta" id="startBtn">
+                        <span>Iniciar Análise Gratuita</span>
+                        <span class="cta-arrow">→</span>
+                    </button>
+                    <p class="cta-note">⏱ Menos de 3 minutos · Sem cadastro</p>
+                </div>
+
+                <div class="social-proof">
+                    <div class="proof-avatars">
+                        <span class="avatar">👤</span>
+                        <span class="avatar">👤</span>
+                        <span class="avatar">👤</span>
+                        <span class="avatar">👤</span>
+                    </div>
+                    <p><strong>+12.400 análises</strong> realizadas esse mês</p>
+                </div>
+
+            </div>
+
+            <div class="hero-right">
+                <div class="mascote-wrap">
+                    <div class="mascote-ring ring-1"></div>
+                    <div class="mascote-ring ring-2"></div>
+                    <img src="/img/mascote.png" alt="ScoreBot" class="landing-robot-img">
+                    <div class="mascote-score-badge">
+                        <span class="msb-num">850</span>
+                        <span class="msb-label">Score</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="benefits-section">
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="bc-icon">📈</div>
+                    <div class="bc-body">
+                        <h3>Aumente seu Score</h3>
+                        <p>Plano personalizado com ações concretas para melhorar sua pontuação</p>
+                    </div>
+                </div>
+                <div class="benefit-card bc-featured">
+                    <div class="bc-icon">🧠</div>
+                    <div class="bc-body">
+                        <h3>Entenda seu Perfil</h3>
+                        <p>IA avançada interpreta seu histórico e identifica oportunidades únicas</p>
+                    </div>
+                    <div class="bc-glow"></div>
+                </div>
+                <div class="benefit-card">
+                    <div class="bc-icon">💳</div>
+                    <div class="bc-body">
+                        <h3>Crédito Inteligente</h3>
+                        <p>Saiba qual limite e produto financeiro combina com seu momento atual</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials-section">
+            <h2 class="section-title">O que dizem nossos usuários</h2>
+            <div class="testi-grid">
+                <div class="testi-card">
+                    <div class="testi-stars">★★★★★</div>
+                    <p>"Em 2 minutos o ScoreBot me mostrou exatamente o que estava travando meu score. Incrível!"</p>
+                    <div class="testi-author">— Mariana S., SP</div>
+                </div>
+                <div class="testi-card tc-featured">
+                    <div class="testi-stars">★★★★★</div>
+                    <p>"Usou meu perfil completo e sugeriu um cartão que eu nem sabia que poderia ter. Aprovado na hora!"</p>
+                    <div class="testi-author">— Carlos R., RJ</div>
+                </div>
+                <div class="testi-card">
+                    <div class="testi-stars">★★★★★</div>
+                    <p>"Análise rápida e objetiva. Já subi 120 pontos seguindo as orientações do ScoreBot."</p>
+                    <div class="testi-author">— Fernanda L., MG</div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="landing-footer">
+            Powered by ScoreBot AI · Análise educacional sem compromisso · Dados não são armazenados
+        </footer>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- SELEÇÃO DE PERFIL — PF ou PJ                         -->
+    <!-- ===================================================== -->
+    <div class="page profile-page hidden" id="profilePage">
+        <div class="profile-wrapper">
+
+            <button class="back-btn" id="backFromProfile">← Voltar</button>
+
+            <div class="profile-header">
+                <img src="/img/mascote.png" alt="ScoreBot" class="profile-robot">
+                <h2>Olá! Vamos começar.</h2>
+                <p>Para qual tipo de perfil você quer fazer a análise?</p>
+            </div>
+
+            <div class="profile-cards">
+                <button class="profile-card" id="choosePF" data-type="pf">
+                    <div class="pc-icon">👤</div>
+                    <div class="pc-body">
+                        <h3>Pessoa Física</h3>
+                        <p>Análise de crédito pessoal — CPF, renda e histórico individual</p>
+                    </div>
+                    <div class="pc-arrow">→</div>
+                </button>
+                <button class="profile-card" id="choosePJ" data-type="pj">
+                    <div class="pc-icon">🏢</div>
+                    <div class="pc-body">
+                        <h3>Pessoa Jurídica</h3>
+                        <p>Análise para empresas — CNPJ, capital de giro e crédito empresarial</p>
+                    </div>
+                    <div class="pc-arrow">→</div>
+                </button>
+            </div>
+
+            <p class="profile-note">🔒 Informações usadas apenas para análise · Não armazenamos dados</p>
+
+        </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- CHAT PAGE                                             -->
+    <!-- ===================================================== -->
+    <div class="page chat-page hidden" id="chatPage">
+        <div class="main-wrapper">
+
+            <div class="chat-topbar">
+                <button class="back-btn" id="backBtn">← Voltar</button>
+                <div class="chat-topbar-brand">
+                    <img src="/img/mascote.png" alt="ScoreBot" class="topbar-robot">
+                    <div>
+                        <span class="topbar-name">ScoreBot</span>
+                        <span class="topbar-status"><span class="status-dot"></span>Online</span>
+                    </div>
+                </div>
+                <div class="chat-profile-badge" id="chatProfileBadge"></div>
+            </div>
+
+            <div class="progress-bar-wrap">
+                <div class="progress-steps" id="progressSteps">
+                    <div class="ps-step active" data-step="1">1 · Perfil</div>
+                    <div class="ps-divider"></div>
+                    <div class="ps-step" data-step="2">2 · Renda</div>
+                    <div class="ps-divider"></div>
+                    <div class="ps-step" data-step="3">3 · Histórico</div>
+                    <div class="ps-divider"></div>
+                    <div class="ps-step" data-step="4">4 · Objetivo</div>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-box" id="chatBox"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="userInput" placeholder="Digite sua resposta..." onkeypress="handleKeyPress(event)" autocomplete="off">
+                    <button onclick="sendMessage()" id="sendButton">
+                        <span>Enviar</span> <span class="send-icon">↑</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- RESULTADOS                                            -->
+    <!-- ===================================================== -->
+    <div class="page results-page hidden" id="resultsPage">
+        <div class="results-wrapper">
+
+            <div class="results-header">
+                <img src="/img/mascote.png" alt="ScoreBot" class="res-robot">
+                <div>
+                    <p class="res-greeting">Análise concluída para</p>
+                    <h2 class="res-nome" id="res-nome">—</h2>
+                </div>
+                <div class="res-profile-tag" id="resProfileTag"></div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-arc-wrap">
+                    <svg viewBox="0 0 120 120" class="score-svg">
+                        <circle cx="60" cy="60" r="54" class="arc-bg"/>
+                        <circle cx="60" cy="60" r="54" class="arc-fill" id="score-arc-fill"/>
+                    </svg>
+                    <div class="score-inner">
+                        <div class="score-num" id="res-score-num">—</div>
+                        <div class="score-label">Score</div>
+                    </div>
+                </div>
+                <div class="score-info">
+                    <div class="score-tier" id="res-tier">—</div>
+                    <div class="score-desc">Perfil avaliado pela IA ScoreBot com base nas informações fornecidas.</div>
+                    <div class="score-tags">
+                        <span class="stag">📊 Renda: <strong id="res-renda">—</strong></span>
+                        <span class="stag">💼 Perfil: <strong id="res-perfil">—</strong></span>
+                        <span class="stag">🎯 Objetivo: <strong id="res-objetivo">—</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="limite-card">
+                <div class="limite-label">💳 Limite Aprovado</div>
+                <div class="limite-valor" id="res-limite">—</div>
+                <div class="limite-sub">Crédito disponível imediatamente após confirmação</div>
+            </div>
+
+            <div class="sugestoes-section">
+                <div class="sug-header">
+                    <span class="sug-title-icon">✨</span>
+                    <h3>Sugestões da IA para você</h3>
+                </div>
+                <div class="sugestoes-grid" id="sugestoes-grid"></div>
+            </div>
+
+            <div class="results-actions">
+                <button class="btn-nova" id="novaAnalise">🔄 Nova Análise</button>
+                <button class="btn-inicio" id="backFromResults">← Início</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

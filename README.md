@@ -1,1 +1,2 @@
-Repositorio do projeto TechFit 2º semestre.
+Repositorio de Projetos Senai 2025/2026.
+
