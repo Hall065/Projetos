@@ -341,7 +341,15 @@ body {
     background: radial-gradient(ellipse at top right, rgba(46,139,87,0.06), transparent 70%);
 }
 
-.bc-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
+.bc-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(246,224,51,0.08);
+    color: var(--primary); margin-top: 2px;
+}
+.bc-icon svg { width: 22px; height: 22px; }
+[data-theme="light"] .bc-icon { background: rgba(46,139,87,0.08); color: var(--secondary); }
 .bc-body h3 {
     font-family: 'Syne', sans-serif; font-size: 1rem;
     font-weight: 700; margin-bottom: 6px;
@@ -436,7 +444,15 @@ body {
 }
 [data-theme="light"] .profile-card:hover { border-color: var(--secondary); }
 
-.pc-icon { font-size: 2rem; flex-shrink: 0; }
+.pc-icon {
+    width: 48px; height: 48px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 14px;
+    background: rgba(246,224,51,0.08);
+    color: var(--primary);
+}
+.pc-icon svg { width: 24px; height: 24px; }
+[data-theme="light"] .pc-icon { background: rgba(46,139,87,0.08); color: var(--secondary); }
 .pc-body { flex: 1; }
 .pc-body h3 {
     font-family: 'Syne', sans-serif; font-size: 1rem;
@@ -561,8 +577,25 @@ body {
 .message {
     padding: 12px 16px; border-radius: 16px;
     font-size: 0.88rem; max-width: 82%; line-height: 1.6;
-    white-space: pre-wrap; animation: fadeInUp 0.3s ease;
+    animation: fadeInUp 0.3s ease;
 }
+
+/* ── Markdown renderizado dentro das mensagens do bot ── */
+.bot p { margin: 0 0 8px; }
+.bot p:last-child { margin-bottom: 0; }
+.bot strong, .bot b { font-weight: 700; color: var(--text); }
+.bot em, .bot i { font-style: italic; }
+.bot ul { list-style: disc; padding-left: 1.4em; margin: 6px 0; }
+.bot li { margin-bottom: 3px; }
+.bot pre { background: var(--surface3); border-radius: 8px; padding: 10px 12px; font-size: 0.8rem; overflow-x: auto; margin: 8px 0; }
+.bot code { font-family: 'Courier New', monospace; font-size: 0.82em; }
+.bot .md-h1 { display: block; font-size: 1rem; margin-bottom: 6px; }
+.bot .md-h2 { display: block; font-size: 0.95rem; margin-bottom: 5px; }
+.bot .md-h3 { display: block; font-size: 0.9rem; margin-bottom: 4px; }
+.bot .md-hr { border: none; border-top: 1px solid var(--border-subtle); margin: 10px 0; }
+
+/* Mensagem do usuário: texto simples */
+.user { white-space: pre-wrap; }
 .bot {
     background: var(--bot-bubble); color: var(--bot-bubble-text);
     align-self: flex-start; border-bottom-left-radius: 4px;
@@ -722,7 +755,18 @@ input[type="text"]:disabled { opacity: 0.45; cursor: not-allowed; }
     border-color: rgba(46,139,87,0.2);
     background: linear-gradient(135deg, #fff 70%, rgba(46,139,87,0.03));
 }
-.sug-icon { font-size: 1.5rem; flex-shrink: 0; }
+.sug-icon-wrap {
+    width: 38px; height: 38px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: rgba(246,224,51,0.08);
+    color: var(--primary);
+}
+.sug-icon-wrap svg { width: 20px; height: 20px; }
+[data-theme="light"] .sug-icon-wrap {
+    background: rgba(46,139,87,0.08);
+    color: var(--secondary);
+}
 .sug-body { flex: 1; }
 .sug-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
 .sug-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; }

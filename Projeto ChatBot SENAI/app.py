@@ -16,7 +16,7 @@ CORS(app)
 # CONFIGURAÇÕES
 # ============================================================
 OLLAMA_URL   = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "gpt-oss:20b-cloud"  # troque se preferir outro modelo
+OLLAMA_MODEL = "deepseek-v3.1:671b-cloud"  # troque se preferir outro modelo
 
 conversation_memory = {}  # { session_id: [{ role, content }, ...] }
 
