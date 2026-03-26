@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Guia - Downloader de Músicas</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #333;
+    padding: 40px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+h2 {
+    margin-bottom: 10px;
+    color: #5a4fcf;
+}
+
+pre {
+    background: #1e1e2f;
+    color: #00ffcc;
+    padding: 15px;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+ul, ol {
+    margin-left: 20px;
+}
+
+.tag {
+    display: inline-block;
+    background: #5a4fcf;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎧 Guia Completo — Downloader de Músicas</h1>
+
+<div class="card">
+<span class="tag">OBJETIVO</span>
+<h2>📌 Objetivo</h2>
+<p>Criar um site em Python para baixar músicas de uma playlist e converter para MP3 automaticamente.</p>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 1</span>
+<h2>🧱 Instalar Python</h2>
+<ol>
+<li>Acesse o site oficial</li>
+<li>Clique em Download</li>
+<li>Marque <b>Add Python to PATH</b></li>
+<li>Instale</li>
+</ol>
+
+<pre>python --version</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 2</span>
+<h2>📦 Instalar bibliotecas</h2>
+<pre>pip install flask yt-dlp</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 3</span>
+<h2>🎬 Instalar FFmpeg</h2>
+<ul>
+<li>Baixar e extrair</li>
+<li>Entrar na pasta bin</li>
+<li>Adicionar ao PATH</li>
+</ul>
+
+<pre>ffmpeg -version</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 4</span>
+<h2>📁 Estrutura</h2>
+
+<pre>
+site-musicas/
+ ├── app.py
+ ├── downloads/
+ └── templates/
+      └── index.html
+</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 5</span>
+<h2>🧠 Código Python</h2>
+
+<pre>
+from flask import Flask, render_template, request
+import yt_dlp
+import os
+
+app = Flask(__name__)
+
+PASTA_DOWNLOAD = "downloads"
+
+if not os.path.exists(PASTA_DOWNLOAD):
+    os.makedirs(PASTA_DOWNLOAD)
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        url = request.form["url"]
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': f'{PASTA_DOWNLOAD}/%(title)s.%(ext)s',
+            'ffmpeg_location': r'C:\\CAMINHO\\bin',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+            }],
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+        return "Download concluído!"
+
+    return render_template("index.html")
+
+app.run(debug=True)
+</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 6</span>
+<h2>🌐 HTML</h2>
+
+<pre>
+&lt;form method="POST"&gt;
+    &lt;input type="text" name="url"&gt;
+    &lt;button&gt;Baixar&lt;/button&gt;
+&lt;/form&gt;
+</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 7</span>
+<h2>▶️ Rodar</h2>
+<pre>python app.py</pre>
+</div>
+
+<div class="card">
+<span class="tag">PASSO 8</span>
+<h2>🌍 Acessar</h2>
+<pre>http://127.0.0.1:5000</pre>
+</div>
+
+<div class="card">
+<span class="tag">RESULTADO</span>
+<h2>🎧 Resultado</h2>
+<ul>
+<li>Músicas em MP3</li>
+<li>Download automático</li>
+<li>Site funcionando</li>
+</ul>
+</div>
+
+<div class="card">
+<span class="tag">CONCLUSÃO</span>
+<h2>🎯 Conclusão</h2>
+<p>Você criou um sistema completo com Python + site + download automático de músicas.</p>
+</div>
+
+</div>
+
+</body>
+</html>
