@@ -116,13 +116,8 @@ document.getElementById('backFromResults').addEventListener('click', () => {
 });
 
 // ============================================================
-// TEMA
+// TEMA  (tratado pelo themeCheckbox mais abaixo)
 // ============================================================
-document.getElementById('themeToggle').addEventListener('click', () => {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-});
 
 // ============================================================
 // BADGE DE PERFIL
@@ -395,3 +390,78 @@ async function resetSession() {
     document.getElementById('chatProfileBadge').textContent = '';
     setStep(1);
 }
+
+// ============================================================
+// LÓGICA DE TEMA (BOTÃO SLIDER)
+// ============================================================
+const themeCheckbox = document.getElementById('themeCheckbox');
+if (themeCheckbox) {
+    // Sincroniza o botão com o tema atual logo que a página carrega
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    themeCheckbox.checked = (currentTheme === 'light');
+
+    themeCheckbox.addEventListener('change', function() {
+        const html = document.documentElement;
+        if (this.checked) {
+            html.setAttribute('data-theme', 'light');
+        } else {
+            html.setAttribute('data-theme', 'dark');
+        }
+    });
+}
+
+// ============================================================
+// ANIMAÇÕES DE SCROLL (FADE-IN / FADE-OUT E PARALLAX)
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+    // ── ESCONDE O LOADING SCREEN ──────────────────────────────
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        // Aguarda no mínimo 1.2s para o efeito ficar suave, depois remove
+        setTimeout(() => {
+            loadingScreen.classList.add('fade-out');
+        }, 1200);
+    }
+
+    // 1. Intersection Observer para Fade In / Fade Out
+    const revealElements = document.querySelectorAll('.reveal-item');
+    
+    const revealOptions = {
+        threshold: 0.15, // 15% do elemento precisa estar na tela
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                entry.target.classList.remove('hidden-scroll');
+            } else {
+                // Ao rolar pra fora, removemos para criar efeito de fade-out
+                entry.target.classList.remove('visible');
+                entry.target.classList.add('hidden-scroll');
+            }
+        });
+    }, revealOptions);
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // 2. Animação de Parallax via Scroll
+    const parallaxElements = document.querySelectorAll('.parallax-item');
+    
+    window.addEventListener('scroll', () => {
+        let scrollY = window.scrollY;
+        
+        parallaxElements.forEach(el => {
+            // Se o usuário adicionou um data-speed, usamos ele. Padrão = 0.3
+            let speed = el.getAttribute('data-speed') || 0.3;
+            el.style.transform = `translateY(${scrollY * speed}px)`;
+        });
+    });
+
+    // ============================================================
+    // CÓDIGO EXTRAÍDO DO HTML (Partículas do Fundo e JS residual)
+    // (Cole aqui o script das partículas (particles.forEach...) e do Canvas 
+    // que estava originalmente na tag <script> do index.html)
+    // ============================================================
+});
