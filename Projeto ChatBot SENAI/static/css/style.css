@@ -98,65 +98,171 @@ body {
 .hidden { display: none !important; }
 
 /* ===== ANIMATIONS ===== */
+
+/* Entrada suave com leve Y — easing elástico orgânico */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
+    0%   { opacity: 0; transform: translateY(28px) scale(0.97); }
+    60%  { opacity: 1; transform: translateY(-4px) scale(1.005); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Entrada lateral esquerda */
+@keyframes fadeInLeft {
+    0%   { opacity: 0; transform: translateX(-22px) scale(0.98); }
+    65%  { opacity: 1; transform: translateX(3px) scale(1.003); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Entrada lateral direita */
+@keyframes fadeInRight {
+    0%   { opacity: 0; transform: translateX(22px) scale(0.98); }
+    65%  { opacity: 1; transform: translateX(-3px) scale(1.003); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Fade simples com micro scale */
 @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
 }
+
+/* Float orgânico: assimétrico, com leve rotação */
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-14px); }
+    0%   { transform: translateY(0px) rotate(-0.3deg); }
+    30%  { transform: translateY(-10px) rotate(0.5deg); }
+    60%  { transform: translateY(-15px) rotate(-0.2deg); }
+    80%  { transform: translateY(-8px) rotate(0.3deg); }
+    100% { transform: translateY(0px) rotate(-0.3deg); }
 }
+
+/* Float suave para elementos menores */
+@keyframes floatSoft {
+    0%   { transform: translateY(0px) translateX(0px); }
+    25%  { transform: translateY(-6px) translateX(2px); }
+    50%  { transform: translateY(-10px) translateX(0px); }
+    75%  { transform: translateY(-5px) translateX(-2px); }
+    100% { transform: translateY(0px) translateX(0px); }
+}
+
+/* Spin com easing suave (não linear uniforme) */
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
+
+/* SpinR mais lento e com pausas sutis */
 @keyframes spinR {
-    to { transform: rotate(-360deg); }
+    0%   { transform: rotate(0deg); }
+    40%  { transform: rotate(-150deg); }
+    100% { transform: rotate(-360deg); }
 }
+
+/* Pulse orgânico — respira, não pisca */
 @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.6; transform: scale(0.85); }
+    0%   { opacity: 0.6; transform: scale(0.88); }
+    45%  { opacity: 1;   transform: scale(1.12); }
+    70%  { opacity: 1;   transform: scale(1.04); }
+    100% { opacity: 0.6; transform: scale(0.88); }
 }
+
+/* Pulse suave só de opacidade para dots de status */
+@keyframes pulseGlow {
+    0%, 100% { opacity: 1;   box-shadow: 0 0 4px currentColor; }
+    50%       { opacity: 0.4; box-shadow: 0 0 10px currentColor; }
+}
+
+/* Bounce orgânico — cada ponto tem peso diferente */
 @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30%           { transform: translateY(-7px); }
+    0%, 100% { transform: translateY(0) scale(1); }
+    20%       { transform: translateY(-8px) scale(0.9); }
+    40%       { transform: translateY(-5px) scale(1.05); }
+    60%       { transform: translateY(-2px) scale(0.98); }
 }
+
+/* Shimmer mais natural — velocidade variável */
 @keyframes shimmer {
-    0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
+    0%   { background-position: -200% center; opacity: 0.8; }
+    50%  { opacity: 1; }
+    100% { background-position: 200% center; opacity: 0.8; }
 }
-/* Coin flip: gira no eixo Y simulando moeda girando */
+
+/* Coin flip com pausa no meio para parecer físico */
 @keyframes coinFlip {
     0%   { transform: rotateY(0deg) scale(1); }
-    25%  { transform: rotateY(90deg) scale(0.85); }
-    50%  { transform: rotateY(180deg) scale(1); }
-    75%  { transform: rotateY(270deg) scale(0.85); }
+    20%  { transform: rotateY(80deg) scale(0.82); }
+    40%  { transform: rotateY(180deg) scale(1.05); }
+    60%  { transform: rotateY(265deg) scale(0.88); }
+    80%  { transform: rotateY(340deg) scale(1.02); }
     100% { transform: rotateY(360deg) scale(1); }
 }
-/* Brilho pulsante no ícone de loading */
+
+/* Brilho pulsante no ícone de loading — cresce devagar, apaga rápido */
 @keyframes lsGlow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(246,224,51,0); filter: drop-shadow(0 0 8px rgba(246,224,51,0.3)); }
-    50%       { box-shadow: 0 0 0 12px rgba(246,224,51,0.06); filter: drop-shadow(0 0 20px rgba(246,224,51,0.6)); }
+    0%   { filter: drop-shadow(0 0 6px rgba(246,224,51,0.2)); }
+    55%  { filter: drop-shadow(0 0 24px rgba(246,224,51,0.7)); }
+    80%  { filter: drop-shadow(0 0 18px rgba(246,224,51,0.5)); }
+    100% { filter: drop-shadow(0 0 6px rgba(246,224,51,0.2)); }
 }
-/* Orb do loading */
+
+/* Orb do loading com trajetória elíptica */
 @keyframes orbFloat {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-    50%       { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+    0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.5; }
+    33%  { transform: translate(-48%, -54%) scale(1.2) rotate(4deg); opacity: 0.9; }
+    66%  { transform: translate(-52%, -46%) scale(1.1) rotate(-3deg); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.5; }
 }
-/* Progress bar slide */
+
+/* Progress bar com aceleração natural (desacelera no fim) */
 @keyframes progressSlide {
-    0%   { width: 0%; }
-    20%  { width: 25%; }
-    50%  { width: 60%; }
-    80%  { width: 85%; }
-    100% { width: 100%; }
+    0%   { width: 0%; opacity: 1; }
+    15%  { width: 28%; }
+    40%  { width: 55%; }
+    70%  { width: 78%; }
+    90%  { width: 92%; }
+    100% { width: 100%; opacity: 1; }
 }
-/* Dots bounce aprimorado */
+
+/* Dots com sequência variada de tamanho e opacidade */
 @keyframes dotPop {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-    40%           { transform: scale(1.2); opacity: 1; }
+    0%, 100% { transform: scale(0.55) translateY(0); opacity: 0.3; }
+    30%       { transform: scale(1.3) translateY(-3px); opacity: 1; }
+    55%       { transform: scale(0.9) translateY(0); opacity: 0.7; }
+}
+
+/* Entrada de mensagem do chat — vem de baixo e expande */
+@keyframes msgIn {
+    0%   { opacity: 0; transform: translateY(10px) scale(0.96); }
+    70%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Entrada de mensagem do usuário — vem da direita */
+@keyframes msgInUser {
+    0%   { opacity: 0; transform: translateX(14px) scale(0.96); }
+    70%  { opacity: 1; transform: translateX(-2px) scale(1.01); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Score arc aparecer com mola */
+@keyframes arcReveal {
+    0%   { stroke-dashoffset: 500; opacity: 0; }
+    30%  { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+/* Badge de destaque — pisca suavemente uma vez ao aparecer */
+@keyframes badgePop {
+    0%   { transform: scale(0.7) rotate(-6deg); opacity: 0; }
+    60%  { transform: scale(1.12) rotate(2deg); opacity: 1; }
+    80%  { transform: scale(0.96) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Reveal de cards com stagger implícito */
+@keyframes cardReveal {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.97) rotateX(4deg); }
+    65%  { opacity: 1; transform: translateY(-3px) scale(1.01) rotateX(0deg); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); }
 }
 
 /* ============================================================
@@ -216,9 +322,10 @@ body {
 
 .badge-dot {
     width: 7px; height: 7px; border-radius: 50%;
-    background: var(--primary); animation: pulse 2s ease infinite;
+    background: var(--primary); animation: pulseGlow 2.8s ease-in-out infinite;
+    color: var(--primary);
 }
-[data-theme="light"] .badge-dot { background: var(--secondary); }
+[data-theme="light"] .badge-dot { background: var(--secondary); color: var(--secondary); }
 
 .landing-title {
     font-family: 'Syne', sans-serif;
@@ -302,7 +409,7 @@ body {
 .landing-robot-img {
     width: 200px; height: auto; position: relative; z-index: 3;
     filter: drop-shadow(0 0 30px rgba(246,224,51,0.35));
-    animation: float 3.5s ease-in-out infinite;
+    animation: float 5.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 [data-theme="light"] .landing-robot-img { filter: drop-shadow(0 0 25px rgba(46,139,87,0.5)); }
 
@@ -312,12 +419,12 @@ body {
 .ring-1 {
     width: 240px; height: 240px;
     border-width: 1.5px; border-color: rgba(246,224,51,0.2);
-    animation: spin 14s linear infinite;
+    animation: spin 22s linear infinite;
 }
 .ring-2 {
     width: 200px; height: 200px;
     border-width: 1px; border-color: rgba(246,224,51,0.1);
-    animation: spinR 20s linear infinite;
+    animation: spinR 32s ease-in-out infinite;
 }
 [data-theme="light"] .ring-1 { border-color: rgba(46,139,87,0.2); }
 [data-theme="light"] .ring-2 { border-color: rgba(46,139,87,0.12); }
@@ -328,8 +435,8 @@ body {
     border-radius: 12px; padding: 8px 14px;
     display: flex; flex-direction: column; align-items: center;
     box-shadow: 0 4px 20px rgba(46,139,87,0.4);
-    animation: float 3.5s ease-in-out infinite;
-    animation-delay: 0.5s;
+    animation: floatSoft 4.2s ease-in-out infinite;
+    animation-delay: 1.2s;
 }
 .msb-num { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; line-height: 1; }
 .msb-label { font-size: 0.65rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -450,7 +557,7 @@ body {
 .profile-robot {
     width: 80px; height: auto;
     filter: drop-shadow(0 0 14px rgba(246,224,51,0.35));
-    animation: float 3s ease-in-out infinite;
+    animation: float 4.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 [data-theme="light"] .profile-robot { filter: drop-shadow(0 0 14px rgba(46,139,87,0.4)); }
 
@@ -528,7 +635,8 @@ body {
 .topbar-robot {
     width: 36px; height: auto;
     filter: drop-shadow(0 0 6px rgba(246,224,51,0.3));
-    animation: float 3s ease-in-out infinite;
+    animation: floatSoft 3.8s ease-in-out infinite;
+    animation-delay: 0.6s;
 }
 [data-theme="light"] .topbar-robot { filter: drop-shadow(0 0 6px rgba(46,139,87,0.35)); }
 
@@ -547,7 +655,8 @@ body {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--secondary); display: inline-block;
     box-shadow: 0 0 6px var(--secondary);
-    animation: pulse 2s ease infinite;
+    animation: pulseGlow 2.4s ease-in-out infinite;
+    color: var(--secondary);
 }
 
 .chat-profile-badge {
@@ -608,7 +717,7 @@ body {
 .message {
     padding: 12px 16px; border-radius: 16px;
     font-size: 0.88rem; max-width: 82%; line-height: 1.6;
-    animation: fadeInUp 0.3s ease;
+    animation: msgIn 0.38s cubic-bezier(0.34, 1.2, 0.64, 1) both;
 }
 
 /* ── Markdown renderizado dentro das mensagens do bot ── */
@@ -636,6 +745,7 @@ body {
 .user {
     background: var(--secondary); color: #fff;
     align-self: flex-end; border-bottom-right-radius: 4px;
+    animation: msgInUser 0.38s cubic-bezier(0.34, 1.2, 0.64, 1) both;
 }
 
 /* Typing indicator */
@@ -645,10 +755,10 @@ body {
 }
 .typing-indicator span {
     width: 7px; height: 7px; background: var(--text-muted);
-    border-radius: 50%; animation: bounce 1.2s infinite;
+    border-radius: 50%; animation: bounce 1.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
 }
-.typing-indicator span:nth-child(2) { animation-delay: 0.18s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.36s; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.22s; background: var(--text-soft); }
+.typing-indicator span:nth-child(3) { animation-delay: 0.44s; }
 
 /* Input Area */
 .chat-input-area {
@@ -702,7 +812,8 @@ input[type="text"]:disabled { opacity: 0.45; cursor: not-allowed; }
 .res-robot {
     width: 52px; flex-shrink: 0;
     filter: drop-shadow(0 0 10px rgba(246,224,51,0.35));
-    animation: float 3s ease-in-out infinite;
+    animation: float 5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    animation-delay: 0.3s;
 }
 [data-theme="light"] .res-robot { filter: drop-shadow(0 0 10px rgba(46,139,87,0.4)); }
 .res-greeting { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 3px; }
@@ -774,10 +885,10 @@ input[type="text"]:disabled { opacity: 0.45; cursor: not-allowed; }
     display: flex; gap: 14px; align-items: flex-start;
     box-shadow: 0 2px 12px var(--shadow-sm);
     position: relative; overflow: hidden;
-    animation: fadeInUp 0.5s ease both;
-    transition: transform 0.2s, box-shadow 0.2s;
+    animation: cardReveal 0.5s cubic-bezier(0.34, 1.1, 0.64, 1) both;
+    transition: transform 0.3s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.3s ease;
 }
-.sug-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px var(--shadow-sm); }
+.sug-card:hover { transform: translateY(-4px) scale(1.015); box-shadow: 0 10px 30px var(--shadow-sm); }
 .sug-destaque {
     border-color: rgba(246,224,51,0.2);
     background: linear-gradient(135deg, var(--card-bg) 70%, rgba(246,224,51,0.04));
@@ -807,6 +918,7 @@ input[type="text"]:disabled { opacity: 0.45; cursor: not-allowed; }
     background: var(--primary); color: #111;
     font-size: 0.62rem; font-weight: 700; padding: 3px 10px;
     border-radius: 50px; font-family: 'Syne', sans-serif;
+    animation: badgePop 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) 0.4s both;
 }
 [data-theme="light"] .sug-badge-dest { background: var(--secondary); color: #fff; }
 
