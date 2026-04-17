@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web FPS - Arena com Cura (Fix Culling)</title>
+    <title>Web FPS - Arsenal & Bosses</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #7EC8E3; font-family: 'Courier New', Courier, monospace; }
         #crosshair {
             position: absolute; top: 50%; left: 50%;
-            width: 20px; height: 20px;
-            background: transparent;
+            width: 20px; height: 20px; background: transparent;
             border: 2px solid rgba(0, 0, 0, 0.7); border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none; z-index: 10;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 10;
         }
         #crosshair::after {
             content: ''; position: absolute; top: 50%; left: 50%;
@@ -20,48 +18,41 @@
             transform: translate(-50%, -50%); border-radius: 50%;
         }
         #ui {
-            position: absolute; bottom: 20px; left: 20px;
-            color: #fff; font-size: 20px; pointer-events: none;
-            text-shadow: 2px 2px 0px #000; z-index: 10;
-            background: rgba(0,0,0,0.7); padding: 15px; border: 2px solid #555;
-            border-radius: 8px;
+            position: absolute; bottom: 20px; left: 20px; color: #fff; font-size: 18px; pointer-events: none;
+            text-shadow: 2px 2px 0px #000; z-index: 10; background: rgba(0,0,0,0.7); padding: 15px; 
+            border: 2px solid #555; border-radius: 8px;
         }
         #health-container {
-            width: 250px; height: 25px; background: #500; 
-            border: 2px solid #fff; margin-bottom: 10px; position: relative;
+            width: 250px; height: 25px; background: #500; border: 2px solid #fff; margin-bottom: 10px; position: relative;
         }
-        #health-bar {
-            width: 100%; height: 100%; background: #0f0; transition: width 0.2s, background-color 0.2s;
-        }
-        #health-text {
-            position: absolute; top: 2px; left: 5px; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 0 #000;
-        }
+        #health-bar { width: 100%; height: 100%; background: #0f0; transition: width 0.2s, background-color 0.2s; }
+        #health-text { position: absolute; top: 2px; left: 5px; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 0 #000; }
         .ui-linha { margin: 5px 0; }
+        
         #menu {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,20,0,0.85); display: flex; flex-direction: column;
             justify-content: center; align-items: center; color: white; z-index: 20;
         }
-        h1 { color: #ffcc00; font-size: 50px; text-shadow: 3px 3px 0px #000; margin-bottom: 10px; }
-        .controles { font-size: 18px; color: #ddd; text-align: center; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; }
+        h1 { color: #ffcc00; font-size: 50px; text-shadow: 3px 3px 0px #000; margin-bottom: 10px; text-align: center;}
+        .controles { font-size: 16px; color: #ddd; text-align: center; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; max-width: 600px; }
         button {
-            padding: 15px 40px; font-size: 22px; cursor: pointer;
-            background: #ffcc00; color: black; border: 3px solid #fff; font-weight: bold;
-            text-transform: uppercase; margin-top: 30px; transition: 0.2s; border-radius: 5px;
+            padding: 15px 40px; font-size: 22px; cursor: pointer; background: #ffcc00; color: black; 
+            border: 3px solid #fff; font-weight: bold; text-transform: uppercase; margin-top: 30px; 
+            transition: 0.2s; border-radius: 5px;
         }
         button:hover { background: #fff; transform: scale(1.05); }
-        #damage-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,0,0,0.4); display: none; pointer-events: none; z-index: 5;
+        
+        #damage-overlay, #heal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; pointer-events: none; z-index: 5;
         }
-        #heal-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,255,0,0.2); display: none; pointer-events: none; z-index: 5;
-        }
-        #reload-alert {
-            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%);
-            color: yellow; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 0px black;
-            display: none; pointer-events: none; z-index: 10;
+        #damage-overlay { background: rgba(255,0,0,0.4); }
+        #heal-overlay { background: rgba(0,255,0,0.2); }
+        
+        #alert-center {
+            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 30px; font-weight: bold; text-shadow: 2px 2px 0px black;
+            display: none; pointer-events: none; z-index: 10; text-align: center;
         }
     </style>
     <script type="importmap">
@@ -77,24 +68,26 @@
     <div id="crosshair"></div>
     <div id="damage-overlay"></div>
     <div id="heal-overlay"></div>
-    <div id="reload-alert">RECARREGANDO...</div>
+    <div id="alert-center"></div>
     <div id="ui">
         <div id="health-container">
             <div id="health-bar"></div>
             <div id="health-text">VIDA: 100</div>
         </div>
-        <div class="ui-linha">🔫 Arma: <span id="weapon-name">AK-47 (Auto)</span></div>
+        <div class="ui-linha">🔫 Arma: <span id="weapon-name">AK-47</span></div>
         <div class="ui-linha" style="color: #ff0;">🔋 Munição: <span id="ammo-count">30</span></div>
         <div class="ui-linha">💀 Abates: <span id="kill-count">0</span></div>
         <div class="ui-linha">👹 Inimigos: <span id="enemy-count">0</span></div>
     </div>
     
     <div id="menu">
-        <h1 id="menu-title">ARENA SELVAGEM</h1>
+        <h1 id="menu-title">ARENA SELVAGEM<br>BATTLE BORN</h1>
         <div class="controles">
-            <p><b>WASD</b> - Mover | <b>1, 2, 3</b> - Trocar Arma | <b>R</b> - Recarregar</p>
-            <p><b>Click Esquerdo</b> - Atirar/Bater | <b>Click Direito</b> - Mirar</p>
-            <p style="color: #0f0; margin-top: 10px;">✚ Pegue as caixas no chão para recuperar vida!</p>
+            <p><b>WASD</b> - Mover | <b>R</b> - Recarregar | <b>Click Esq</b> - Atirar | <b>Click Dir</b> - Mirar</p>
+            <hr>
+            <p style="color:#ffcc00"><b>1</b>: AK-47 | <b>2</b>: Shotgun | <b>3</b>: Sniper<br><b>4</b>: SMG | <b>5</b>: Secundária | <b>6</b>: Faca</p>
+            <hr>
+            <p style="color: #0f0;">✚ Caixas recuperam vida. Sobreviva aos Chefes!</p>
         </div>
         <button id="start-btn">Jogar</button>
     </div>
@@ -103,7 +96,7 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        // 1. CONFIGURAÇÃO BÁSICA
+        // 1. CENA BÁSICA
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x7EC8E3);
         scene.fog = new THREE.FogExp2(0x7EC8E3, 0.012);
@@ -119,6 +112,7 @@
         const menu = document.getElementById('menu');
         const startBtn = document.getElementById('start-btn');
         const menuTitle = document.getElementById('menu-title');
+        const alertCenter = document.getElementById('alert-center');
 
         startBtn.addEventListener('click', () => {
             if(playerHealth <= 0) resetGame();
@@ -136,7 +130,7 @@
         });
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // 2. ILUMINAÇÃO E CENÁRIO
+        // 2. LUZ E CHÃO
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); 
         scene.add(ambientLight);
         const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -170,23 +164,21 @@
             const leafMat = new THREE.MeshStandardMaterial({ color: 0x228b22 }); 
             const rockMat = new THREE.MeshStandardMaterial({ color: 0x777777, roughness: 0.9 });
 
-            for(let i=0; i<80; i++) {
+            for(let i=0; i<100; i++) {
                 if(Math.random() > 0.3) {
                     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 4), treeMat);
                     trunk.position.y = 2;
                     const leaves = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 8), leafMat);
                     leaves.position.y = 6;
-                    
                     const tree = new THREE.Group();
                     tree.add(trunk, leaves);
                     tree.traverse(child => { if(child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
-                    
                     const angle = Math.random() * Math.PI * 2;
-                    const radius = 15 + Math.random() * 120;
+                    const radius = 15 + Math.random() * 130;
                     tree.position.set(Math.cos(angle)*radius, 0, Math.sin(angle)*radius);
                     scene.add(tree);
                 } else {
-                    const size = 1 + Math.random() * 2;
+                    const size = 1 + Math.random() * 2.5;
                     const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(size, 0), rockMat);
                     rock.position.y = size / 2;
                     const angle = Math.random() * Math.PI * 2;
@@ -200,7 +192,7 @@
         }
         createScenery();
 
-        // 3. JOGADOR, VIDA E CURA
+        // 3. JOGADOR E UI
         let playerHealth = 100;
         let kills = 0;
         const medkits = [];
@@ -209,9 +201,7 @@
             const bar = document.getElementById('health-bar');
             document.getElementById('health-text').innerText = `VIDA: ${playerHealth}`;
             bar.style.width = Math.max(0, playerHealth) + '%';
-            if(playerHealth > 50) bar.style.backgroundColor = '#0f0';
-            else if(playerHealth > 20) bar.style.backgroundColor = '#ff0';
-            else bar.style.backgroundColor = '#f00';
+            bar.style.backgroundColor = playerHealth > 50 ? '#0f0' : (playerHealth > 20 ? '#ff0' : '#f00');
             if(playerHealth <= 0) gameOver();
         }
 
@@ -234,94 +224,123 @@
 
         function spawnMedkit(x, z) {
             const mkGroup = new THREE.Group();
-            
             const box = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.5), new THREE.MeshStandardMaterial({color: 0xffffff}));
             const redMat = new THREE.MeshBasicMaterial({color: 0xff0000});
             const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.15, 0.55), redMat);
             const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.45, 0.55), redMat);
-            
             mkGroup.add(box, crossH, crossV);
             mkGroup.position.set(x, 0.5, z);
             scene.add(mkGroup);
             medkits.push(mkGroup);
         }
 
+        function showAlert(msg, color, time) {
+            alertCenter.innerText = msg;
+            alertCenter.style.color = color;
+            alertCenter.style.display = 'block';
+            setTimeout(() => alertCenter.style.display = 'none', time);
+        }
+
         function gameOver() {
             controls.unlock();
             menu.style.display = 'flex';
-            menuTitle.innerText = "FIM DE JOGO!";
+            menuTitle.innerHTML = "VOCÊ MORREU!";
             menuTitle.style.color = "#ff0000";
             startBtn.innerText = "Tentar Novamente";
         }
 
         function resetGame() {
-            playerHealth = 100;
-            kills = 0;
+            playerHealth = 100; kills = 0;
             document.getElementById('kill-count').innerText = kills;
             updateHealthUI();
             menuTitle.style.color = "#ffcc00";
 
-            weapons[1].currentAmmo = weapons[1].magSize;
-            weapons[2].currentAmmo = weapons[2].magSize;
-            updateAmmoUI();
+            Object.values(weapons).forEach(w => w.currentAmmo = w.magSize);
+            switchWeapon(1);
 
-            enemies.forEach(e => scene.remove(e));
-            enemies.length = 0;
-            
-            medkits.forEach(m => scene.remove(m));
-            medkits.length = 0;
+            enemies.forEach(e => scene.remove(e)); enemies.length = 0;
+            medkits.forEach(m => scene.remove(m)); medkits.length = 0;
 
             document.getElementById('enemy-count').innerText = "0";
-            for(let i=0; i<8; i++) createEnemy();
+            for(let i=0; i<5; i++) spawnEnemy('standard');
         }
 
-        // 4. MODELOS DAS ARMAS
+        // 4. MODELOS DE ARMAS (EXPANDIDO)
+        const matDark = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        const matWood = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
+        const matSilver = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
+        const matBlack = new THREE.MeshStandardMaterial({ color: 0x111111 });
+
         function createAK47() {
             const group = new THREE.Group();
-            const matDark = new THREE.MeshStandardMaterial({ color: 0x222222 });
-            const matWood = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
-            
-            const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.3), matDark);
-            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.4), matDark);
-            barrel.rotation.x = Math.PI / 2; barrel.position.set(0, 0.02, -0.3);
+            const rec = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.3), matDark);
+            const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.4), matDark);
+            bar.rotation.x = Math.PI/2; bar.position.set(0, 0.02, -0.3);
             const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.2), matWood);
             stock.position.set(0, -0.02, 0.2); stock.rotation.x = -0.1;
             const mag = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.15, 0.08), matDark);
             mag.position.set(0, -0.1, -0.05); mag.rotation.x = 0.2;
+            group.add(rec, bar, stock, mag); return group;
+        }
 
-            group.add(receiver, barrel, stock, mag);
-            return group;
+        function createShotgun() {
+            const group = new THREE.Group();
+            const rec = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.25), matDark);
+            const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.5), matDark);
+            bar.rotation.x = Math.PI/2; bar.position.set(0, 0.02, -0.35);
+            const pump = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.06, 0.15), matWood);
+            pump.position.set(0, 0, -0.2);
+            const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.2), matWood);
+            stock.position.set(0, -0.05, 0.2); stock.rotation.x = -0.15;
+            group.add(rec, bar, pump, stock); return group;
+        }
+
+        function createSniper() {
+            const group = new THREE.Group();
+            const rec = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.35), matDark);
+            const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.7), matDark);
+            bar.rotation.x = Math.PI/2; bar.position.set(0, 0.02, -0.5);
+            const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2), matBlack);
+            scope.rotation.x = Math.PI/2; scope.position.set(0, 0.08, -0.05);
+            const stock = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.25), matDark);
+            stock.position.set(0, -0.02, 0.25);
+            group.add(rec, bar, scope, stock); return group;
+        }
+
+        function createSMG() {
+            const group = new THREE.Group();
+            const rec = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.12, 0.2), matDark);
+            const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.2), matDark);
+            bar.rotation.x = Math.PI/2; bar.position.set(0, 0.03, -0.2);
+            const mag = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.2, 0.06), matDark);
+            mag.position.set(0, -0.15, 0);
+            group.add(rec, bar, mag); return group;
         }
 
         function createDeagle() {
             const group = new THREE.Group();
-            const matSilver = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
-            const matBlack = new THREE.MeshStandardMaterial({ color: 0x111111 });
-
             const slide = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.25), matSilver);
             const grip = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.06), matBlack);
             grip.position.set(0, -0.08, 0.08); grip.rotation.x = 0.2;
-            group.add(slide, grip);
-            return group;
+            group.add(slide, grip); return group;
         }
 
         function createKnife() {
             const group = new THREE.Group();
-            const matSilver = new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 1 });
-            const matBlack = new THREE.MeshStandardMaterial({ color: 0x111111 });
-
             const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.12), matBlack);
-            handle.rotation.x = Math.PI / 2;
+            handle.rotation.x = Math.PI/2;
             const blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.04, 0.2), matSilver);
             blade.position.set(0, 0, -0.15);
-            group.add(handle, blade);
-            return group;
+            group.add(handle, blade); return group;
         }
 
         const weapons = {
-            1: { model: createAK47(), name: "AK-47 (Auto)", fireRate: 100, range: 100, damage: 30, auto: true, magSize: 30, currentAmmo: 30, reloadTime: 1800 },
-            2: { model: createDeagle(), name: "Desert Eagle", fireRate: 400, range: 100, damage: 60, auto: false, magSize: 7, currentAmmo: 7, reloadTime: 1200 },
-            3: { model: createKnife(), name: "Baioneta", fireRate: 400, range: 3, damage: 100, auto: false, magSize: Infinity, currentAmmo: Infinity, reloadTime: 0 }
+            1: { model: createAK47(), name: "AK-47 (Auto)", fireRate: 100, range: 100, damage: 30, auto: true, magSize: 30, currentAmmo: 30, reloadTime: 1800, bullets: 1, spread: 0.02, zoom: 45 },
+            2: { model: createShotgun(), name: "Shotgun", fireRate: 800, range: 40, damage: 18, auto: false, magSize: 8, currentAmmo: 8, reloadTime: 2200, bullets: 8, spread: 0.2, zoom: 60 },
+            3: { model: createSniper(), name: "Sniper AWP", fireRate: 1200, range: 300, damage: 150, auto: false, magSize: 5, currentAmmo: 5, reloadTime: 2500, bullets: 1, spread: 0, zoom: 15 },
+            4: { model: createSMG(), name: "SMG Rápida", fireRate: 60, range: 60, damage: 15, auto: true, magSize: 45, currentAmmo: 45, reloadTime: 1400, bullets: 1, spread: 0.06, zoom: 50 },
+            5: { model: createDeagle(), name: "Desert Eagle", fireRate: 350, range: 100, damage: 65, auto: false, magSize: 7, currentAmmo: 7, reloadTime: 1200, bullets: 1, spread: 0.01, zoom: 45 },
+            6: { model: createKnife(), name: "Faca Tática", fireRate: 350, range: 3, damage: 100, auto: false, magSize: Infinity, currentAmmo: Infinity, reloadTime: 0, bullets: 1, spread: 0, zoom: 75 }
         };
 
         const weaponGroup = new THREE.Group();
@@ -331,41 +350,51 @@
         let currentWeaponId = 1;
         let activeWeaponModel = weapons[1].model;
         let isReloading = false;
+        let isAiming = false;
         let reloadAnimationInterval = null;
 
         weaponGroup.add(activeWeaponModel);
         activeWeaponModel.position.set(0.3, -0.2, -0.4);
 
         function updateAmmoUI() {
-            const ammoSpan = document.getElementById('ammo-count');
             const w = weapons[currentWeaponId];
-            if(w.magSize === Infinity) ammoSpan.innerText = "Infinito";
-            else ammoSpan.innerText = w.currentAmmo;
-            
-            if(w.currentAmmo === 0 && w.magSize !== Infinity) ammoSpan.style.color = "red";
-            else ammoSpan.style.color = "yellow";
+            const span = document.getElementById('ammo-count');
+            span.innerText = w.magSize === Infinity ? "Infinito" : w.currentAmmo;
+            span.style.color = (w.currentAmmo === 0 && w.magSize !== Infinity) ? "red" : "yellow";
         }
 
         function switchWeapon(id) {
             if(isReloading || id === currentWeaponId) return; 
-            
             weaponGroup.remove(activeWeaponModel);
             currentWeaponId = id;
             activeWeaponModel = weapons[id].model;
             document.getElementById('weapon-name').innerText = weapons[id].name;
             updateAmmoUI();
-
-            if(id === 3) activeWeaponModel.position.set(0.3, -0.2, -0.2);
-            else activeWeaponModel.position.set(0.3, -0.2, -0.4);
-            activeWeaponModel.rotation.set(0,0,0);
-            
+            resetWeaponPos();
             weaponGroup.add(activeWeaponModel);
+            if(isAiming) aimWeapon(true);
+        }
+
+        function resetWeaponPos() {
+            activeWeaponModel.rotation.set(0,0,0);
+            activeWeaponModel.position.set(0.3, -0.2, currentWeaponId===6 ? -0.2 : -0.4);
+        }
+
+        function aimWeapon(state) {
+            isAiming = state;
+            const w = weapons[currentWeaponId];
+            if(state && currentWeaponId !== 6) {
+                camera.fov = w.zoom;
+                activeWeaponModel.position.set(0, -0.12, -0.3);
+            } else {
+                camera.fov = 75;
+                resetWeaponPos();
+            }
+            camera.updateProjectionMatrix();
         }
 
         document.addEventListener('keydown', (e) => {
-            if(e.key === '1') switchWeapon(1);
-            if(e.key === '2') switchWeapon(2);
-            if(e.key === '3') switchWeapon(3);
+            if(e.key >= '1' && e.key <= '6') switchWeapon(parseInt(e.key));
             if(e.code === 'KeyR' && !isReloading) triggerReload();
         });
 
@@ -377,14 +406,14 @@
         function triggerReload() {
             const w = weapons[currentWeaponId];
             if(w.magSize === Infinity || w.currentAmmo === w.magSize || isReloading) return;
-            
             isReloading = true;
-            document.getElementById('reload-alert').style.display = 'block';
+            document.getElementById('alert-center').innerText = "RECARREGANDO...";
+            document.getElementById('alert-center').style.color = "yellow";
+            document.getElementById('alert-center').style.display = 'block';
             document.getElementById('ammo-count').innerText = "--";
 
             let tick = 0;
             const startY = activeWeaponModel.position.y;
-            
             reloadAnimationInterval = setInterval(() => {
                 tick += 0.2;
                 activeWeaponModel.rotation.x = -Math.sin(tick) * 0.8; 
@@ -395,12 +424,9 @@
                 clearInterval(reloadAnimationInterval);
                 w.currentAmmo = w.magSize;
                 isReloading = false;
-                document.getElementById('reload-alert').style.display = 'none';
+                document.getElementById('alert-center').style.display = 'none';
                 updateAmmoUI();
-                
-                activeWeaponModel.rotation.set(0,0,0);
-                if(currentWeaponId === 3) activeWeaponModel.position.set(0.3, -0.2, -0.2);
-                else activeWeaponModel.position.set(0.3, -0.2, -0.4);
+                if(isAiming) aimWeapon(true); else resetWeaponPos();
             }, w.reloadTime);
         }
 
@@ -410,113 +436,125 @@
                 isShooting = true;
                 if (!weapons[currentWeaponId].auto) fire();
             }
-            if (e.button === 2) {
-                camera.fov = 45; camera.updateProjectionMatrix();
-                activeWeaponModel.position.set(0, -0.15, -0.3);
-            }
+            if (e.button === 2) aimWeapon(true);
         });
 
         document.addEventListener('mouseup', (e) => {
             if (e.button === 0) isShooting = false;
-            if (e.button === 2 && !isReloading) {
-                camera.fov = 75; camera.updateProjectionMatrix();
-                if(currentWeaponId === 3) activeWeaponModel.position.set(0.3, -0.2, -0.2);
-                else activeWeaponModel.position.set(0.3, -0.2, -0.4);
-            }
+            if (e.button === 2 && !isReloading) aimWeapon(false);
         });
 
         function fire() {
             const now = Date.now();
             const weapon = weapons[currentWeaponId];
-            
             if (now - lastFireTime < weapon.fireRate || isReloading) return;
-            
-            if (weapon.currentAmmo <= 0) {
-                triggerReload();
-                return;
-            }
+            if (weapon.currentAmmo <= 0) { triggerReload(); return; }
 
             lastFireTime = now;
             if (weapon.magSize !== Infinity) weapon.currentAmmo--;
             updateAmmoUI();
 
-            activeWeaponModel.position.z += 0.05;
-            activeWeaponModel.rotation.x += 0.05;
+            // Recuo Visual
+            activeWeaponModel.position.z += 0.05; activeWeaponModel.rotation.x += 0.05;
             setTimeout(() => {
-                if(!isReloading) {
-                    activeWeaponModel.position.z -= 0.05;
-                    activeWeaponModel.rotation.x -= 0.05;
-                }
+                if(!isReloading) { activeWeaponModel.position.z -= 0.05; activeWeaponModel.rotation.x -= 0.05; }
             }, 50);
 
-            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            // Sistema de Tiros Múltiplos (Spread)
             const enemyObjects = enemies.map(e => e.hitbox);
-            const intersects = raycaster.intersectObjects(enemyObjects);
-
-            if (intersects.length > 0 && intersects[0].distance <= weapon.range) {
-                const enemyGroup = intersects[0].object.parent;
+            
+            for(let i=0; i < weapon.bullets; i++) {
+                let spreadX = (Math.random() - 0.5) * weapon.spread;
+                let spreadY = (Math.random() - 0.5) * weapon.spread;
                 
-                if (enemyGroup.health <= 0) return;
+                // Se estiver mirando, reduz o spread (mais precisão)
+                if(isAiming) { spreadX *= 0.2; spreadY *= 0.2; }
 
-                enemyGroup.health -= weapon.damage;
-                
-                const healthPercent = Math.max(0.001, enemyGroup.health) / 100;
-                enemyGroup.hpBar.scale.x = healthPercent;
-                
-                if(healthPercent <= 0.3) enemyGroup.hpBar.material.color.setHex(0xff0000); 
-                else if(healthPercent <= 0.6) enemyGroup.hpBar.material.color.setHex(0xffff00); 
+                raycaster.setFromCamera(new THREE.Vector2(spreadX, spreadY), camera);
+                const intersects = raycaster.intersectObjects(enemyObjects);
 
-                enemyGroup.children.forEach(child => {
-                    if(child.material && child.isMesh && child.material.emissive) {
-                        child.material.emissive.setHex(0x550000); 
-                        setTimeout(() => { 
-                            if(enemyGroup.parent && child.material) child.material.emissive.setHex(0x000000); 
-                        }, 50);
-                    }
-                });
+                if (intersects.length > 0 && intersects[0].distance <= weapon.range) {
+                    const enemyGroup = intersects[0].object.parent;
+                    if (enemyGroup.health <= 0) continue;
 
-                if (enemyGroup.health <= 0) {
-                    if (Math.random() < 0.4) {
-                        spawnMedkit(enemyGroup.position.x, enemyGroup.position.z);
-                    }
+                    // Multiplicador de Headshot (se acertou alto na hitbox)
+                    const hitHeight = intersects[0].point.y - enemyGroup.position.y;
+                    let finalDamage = weapon.damage;
+                    if (hitHeight > (enemyGroup.hitboxHeight * 0.7)) finalDamage *= 2; 
 
-                    scene.remove(enemyGroup);
+                    enemyGroup.health -= finalDamage;
                     
-                    const index = enemies.indexOf(enemyGroup);
-                    if (index > -1) {
-                        enemies.splice(index, 1);
-                    }
-                    
-                    kills++;
-                    document.getElementById('kill-count').innerText = kills;
-                    document.getElementById('enemy-count').innerText = enemies.length;
+                    const healthPercent = Math.max(0.001, enemyGroup.health) / enemyGroup.maxHealth;
+                    enemyGroup.hpBar.scale.x = healthPercent;
+                    if(healthPercent <= 0.3) enemyGroup.hpBar.material.color.setHex(0xff0000); 
+                    else if(healthPercent <= 0.6) enemyGroup.hpBar.material.color.setHex(0xffff00); 
+
+                    // Piscar vermelho
+                    enemyGroup.children.forEach(child => {
+                        if(child.material && child.isMesh && child.material.emissive) {
+                            child.material.emissive.setHex(0x550000); 
+                            setTimeout(() => { if(enemyGroup.parent && child.material) child.material.emissive.setHex(0x000000); }, 50);
+                        }
+                    });
+
+                    if (enemyGroup.health <= 0) handleEnemyDeath(enemyGroup);
                 }
             }
         }
 
-        // 6. INIMIGOS
+        function handleEnemyDeath(enemyGroup) {
+            // Drop de Vida
+            if (enemyGroup.isBoss) {
+                for(let k=0; k<5; k++) spawnMedkit(enemyGroup.position.x + (Math.random()*4-2), enemyGroup.position.z + (Math.random()*4-2));
+                showAlert("BOSS DERROTADO!", "#0f0", 3000);
+            } else if (Math.random() < 0.3) {
+                spawnMedkit(enemyGroup.position.x, enemyGroup.position.z);
+            }
+
+            scene.remove(enemyGroup);
+            const index = enemies.indexOf(enemyGroup);
+            if (index > -1) enemies.splice(index, 1);
+            
+            kills++;
+            document.getElementById('kill-count').innerText = kills;
+            document.getElementById('enemy-count').innerText = enemies.length;
+
+            // Spawna Boss a cada 15 mortes
+            if(kills > 0 && kills % 15 === 0) {
+                const isColossus = Math.random() > 0.5;
+                spawnEnemy(isColossus ? 'boss_colossus' : 'boss_mutant');
+                showAlert(`⚠️ BOSS DETECTADO: ${isColossus ? 'COLOSSO' : 'MUTANTE'} ⚠️`, "#ff0000", 4000);
+            }
+        }
+
+        // 6. INIMIGOS E BOSSES
         const enemies = [];
-        let maxEnemies = 30;
+        let maxEnemies = 25;
         let lastSpawnTime = 0;
 
-        function createEnemy() {
+        function spawnEnemy(type = 'standard') {
             const group = new THREE.Group();
-            
-            // --- A MÁGICA ACONTECE AQUI ---
-            // Desativando o Frustum Culling para o grupo inteiro
             group.frustumCulled = false;
             
-            const matSkin = new THREE.MeshStandardMaterial({ color: 0x4a5d23, roughness: 0.7 }); 
-            const matShirt = new THREE.MeshStandardMaterial({ color: 0x8b0000 }); 
-            const matPants = new THREE.MeshStandardMaterial({ color: 0x2f4f4f }); 
+            let colorSkin = 0x4a5d23, colorShirt = 0x8b0000, colorPants = 0x2f4f4f;
+            let scale = 1, hp = 100, speed = 4.0, dmg = 15;
+            let isBoss = false;
+
+            if(type === 'fast') { scale = 0.7; hp = 50; speed = 7.5; colorShirt = 0xcccc00; dmg = 8; }
+            else if(type === 'tank') { scale = 1.4; hp = 300; speed = 2.0; colorShirt = 0x333333; dmg = 25; }
+            else if(type === 'boss_colossus') { scale = 2.8; hp = 1500; speed = 1.8; colorShirt = 0x000000; colorSkin = 0x330000; dmg = 50; isBoss = true; }
+            else if(type === 'boss_mutant') { scale = 1.8; hp = 1000; speed = 6.0; colorShirt = 0x4B0082; colorSkin = 0x8A2BE2; dmg = 35; isBoss = true; }
+
+            const matSkin = new THREE.MeshStandardMaterial({ color: colorSkin, roughness: 0.7 }); 
+            const matShirt = new THREE.MeshStandardMaterial({ color: colorShirt }); 
+            const matPants = new THREE.MeshStandardMaterial({ color: colorPants }); 
             
             const body = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.4, 0.8), matShirt);
             body.position.y = 1.4; body.castShadow = true;
-
             const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), matSkin);
             head.position.y = 2.45; head.castShadow = true;
 
-            const matEye = new THREE.MeshBasicMaterial({ color: 0xffcc00 }); 
+            const matEye = new THREE.MeshBasicMaterial({ color: isBoss ? 0xff0000 : 0xffcc00 }); 
             const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.1), matEye);
             eyeL.position.set(-0.15, 2.5, 0.36);
             const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.1), matEye);
@@ -534,69 +572,55 @@
             const legR = new THREE.Mesh(legGeo, matPants);
             legR.position.set(0.25, 0.4, 0); legR.castShadow = true;
 
-            const hitboxGeo = new THREE.BoxGeometry(1.6, 2.8, 1.8);
-            const hitboxMat = new THREE.MeshBasicMaterial({ visible: false });
-            const hitbox = new THREE.Mesh(hitboxGeo, hitboxMat);
+            const hitboxHeight = 2.8 * scale;
+            const hitbox = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.8, 1.8), new THREE.MeshBasicMaterial({ visible: false }));
             hitbox.position.y = 1.4;
 
             const hpWidth = 1.2;
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(hpWidth, 0.15), new THREE.MeshBasicMaterial({ color: 0x330000, side: THREE.DoubleSide }));
             const hpFgGeo = new THREE.PlaneGeometry(hpWidth, 0.15);
             hpFgGeo.translate(hpWidth/2, 0, 0);
-            const hpFg = new THREE.Mesh(hpFgGeo, new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide }));
+            const hpFg = new THREE.Mesh(hpFgGeo, new THREE.MeshBasicMaterial({ color: isBoss?0xff00ff:0x00ff00, side: THREE.DoubleSide }));
             hpFg.position.set(-hpWidth/2, 0, 0.01);
-
             const hpGroup = new THREE.Group();
             hpGroup.add(hpBg, hpFg);
             hpGroup.position.set(0, 3.2, 0);
 
             group.add(body, head, eyeL, eyeR, armL, armR, legL, legR, hitbox, hpGroup);
-            
-            // --- E AQUI TAMBÉM ---
-            // Garantindo que nenhuma peça individual seja descartada pelo culling
-            group.traverse((child) => {
-                child.frustumCulled = false;
-            });
+            group.scale.set(scale, scale, scale);
+            group.traverse(c => c.frustumCulled = false);
 
-            group.hitbox = hitbox; 
-            group.hpBar = hpFg; 
-            group.hpGroup = hpGroup; 
-            group.health = 100;
+            group.hitbox = hitbox; group.hitboxHeight = hitboxHeight;
+            group.hpBar = hpFg; group.hpGroup = hpGroup; 
+            group.maxHealth = hp; group.health = hp; group.moveSpeed = speed;
+            group.damage = dmg; group.isBoss = isBoss;
             group.lastAttackTime = 0;
 
             const angle = Math.random() * Math.PI * 2;
-            const radius = 25 + Math.random() * 30; 
-            group.position.set(
-                camera.position.x + Math.cos(angle) * radius,
-                0,
-                camera.position.z + Math.sin(angle) * radius
-            );
+            const radius = 25 + Math.random() * 40; 
+            group.position.set(camera.position.x + Math.cos(angle)*radius, 0, camera.position.z + Math.sin(angle)*radius);
 
-            scene.add(group);
-            enemies.push(group);
+            scene.add(group); enemies.push(group);
             document.getElementById('enemy-count').innerText = enemies.length;
         }
 
-        // 7. MOVIMENTAÇÃO WASD
+        // 7. MOVIMENTAÇÃO
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
         let moveF = false, moveB = false, moveL = false, moveR = false;
 
         document.addEventListener('keydown', (e) => {
-            if(e.code === 'KeyW') moveF = true;
-            if(e.code === 'KeyA') moveL = true;
-            if(e.code === 'KeyS') moveB = true;
-            if(e.code === 'KeyD') moveR = true;
+            if(e.code === 'KeyW') moveF = true; if(e.code === 'KeyA') moveL = true;
+            if(e.code === 'KeyS') moveB = true; if(e.code === 'KeyD') moveR = true;
         });
         document.addEventListener('keyup', (e) => {
-            if(e.code === 'KeyW') moveF = false;
-            if(e.code === 'KeyA') moveL = false;
-            if(e.code === 'KeyS') moveB = false;
-            if(e.code === 'KeyD') moveR = false;
+            if(e.code === 'KeyW') moveF = false; if(e.code === 'KeyA') moveL = false;
+            if(e.code === 'KeyS') moveB = false; if(e.code === 'KeyD') moveR = false;
         });
 
-        // 8. LOOP DO JOGO
+        // 8. LOOP PRINCIPAL
         const clock = new THREE.Clock();
+        const types = ['standard', 'standard', 'fast', 'tank'];
 
         function animate() {
             requestAnimationFrame(animate);
@@ -606,8 +630,9 @@
             if (controls.isLocked && playerHealth > 0) {
                 if (isShooting && weapons[currentWeaponId].auto && !isReloading) fire();
 
-                if (now - lastSpawnTime > 2500 && enemies.length < maxEnemies) {
-                    createEnemy();
+                if (now - lastSpawnTime > 2000 && enemies.length < maxEnemies) {
+                    const randomType = types[Math.floor(Math.random() * types.length)];
+                    spawnEnemy(randomType);
                     lastSpawnTime = now;
                 }
 
@@ -615,13 +640,9 @@
                 
                 for (let i = medkits.length - 1; i >= 0; i--) {
                     let mk = medkits[i];
-                    mk.rotation.y += 2 * delta; 
-                    mk.position.y = 0.5 + Math.sin(now * 0.005) * 0.15; 
-                    
+                    mk.rotation.y += 2 * delta; mk.position.y = 0.5 + Math.sin(now * 0.005) * 0.15; 
                     if (mk.position.distanceTo(playerPos) < 2.0 && playerHealth < 100) {
-                        heal(25);
-                        scene.remove(mk);
-                        medkits.splice(i, 1);
+                        heal(30); scene.remove(mk); medkits.splice(i, 1);
                     }
                 }
 
@@ -630,20 +651,18 @@
                     const dz = playerPos.z - enemy.position.z;
                     const dist2D = Math.sqrt(dx*dx + dz*dz);
                     
-                    if (dist2D > 0.1) {
-                        enemy.lookAt(playerPos.x, enemy.position.y, playerPos.z);
-                    }
-
+                    if (dist2D > 0.1) enemy.lookAt(playerPos.x, enemy.position.y, playerPos.z);
                     enemy.hpGroup.lookAt(camera.position);
 
                     const dist = enemy.position.distanceTo(playerPos);
-                    
-                    if (dist > 2.5) {
-                        enemy.translateZ(4 * delta); 
+                    const atkRange = enemy.isBoss ? (enemy.scale.x * 2.0) : 2.5;
+
+                    if (dist > atkRange) {
+                        enemy.translateZ(enemy.moveSpeed * delta); 
                         enemy.rotation.z = Math.sin(now * 0.01 + index) * 0.1;
                     } else {
                         if (now - enemy.lastAttackTime > 1000) { 
-                            takeDamage(15);
+                            takeDamage(enemy.damage);
                             enemy.lastAttackTime = now;
                         }
                     }
@@ -663,11 +682,8 @@
                 controls.moveForward(-velocity.z * delta);
                 controls.getObject().position.y = 1.7; 
                 
-                if (moveF || moveB || moveL || moveR) {
-                    controls.getObject().position.y += Math.sin(now * 0.01) * 0.05;
-                }
+                if (moveF || moveB || moveL || moveR) controls.getObject().position.y += Math.sin(now * 0.01) * 0.05;
             }
-
             renderer.render(scene, camera);
         }
 
