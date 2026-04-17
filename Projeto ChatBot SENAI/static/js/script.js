@@ -1,69 +1,52 @@
 /**
  * ScoreBot — script.js
  * Fluxo com seleção PF/PJ, etapas de conversa e integração Flask
+ * Atualizado com: Login/Registro, Voz (STT/TTS), Histórico, Memória
  */
 
 // ============================================================
-// ESTADO GLOBAL
+// ESTADO GLOBAL (original + novos)
 // ============================================================
-let sessionId = null;
+let sessionId       = null;
 let userProfileType = null; // 'pf' | 'pj'
-let currentStep = 1;
-const TOTAL_STEPS = 4;
+let currentStep     = 1;
+const TOTAL_STEPS   = 4;
+
+// ── Novos estados ─────────────────────────────────────────
+let currentUserId   = null;  // null = modo anônimo
+let isAnonymous     = false; // true se escolheu "continuar sem conta"
+let autoSpeak       = false; // TTS automático
+let micActive       = false; // microfone ligado
+let recognition     = null;  // SpeechRecognition instance
 
 // ============================================================
 // MARKDOWN → HTML  (formatação das mensagens do bot)
 // ============================================================
 function parseMarkdown(text) {
-    // Remove tags HTML literais que o modelo às vezes injeta (<br>, <br/>, etc.)
     text = text.replace(/<br\s*\/?>/gi, '\n');
-    // Remove outros tags HTML residuais mas preserva o conteúdo
     text = text.replace(/<\/?(?!strong|em|b|i)[a-z][^>]*>/gi, '');
-
-    // Blocos de código (``` ... ```)
     text = text.replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-
-    // Negrito: **texto** ou __texto__
     text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
-
-    // Itálico: *texto* ou _texto_ (não confundir com **)
     text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
     text = text.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em>$1</em>');
-
-    // Listas não-ordenadas: linhas que começam com - ou *
     text = text.replace(/^[\s]*[-*]\s+(.+)$/gm, '<li>$1</li>');
     text = text.replace(/(<li>.*<\/li>(\n|$))+/g, match => `<ul>${match}</ul>`);
-
-    // Listas ordenadas: 1. 2. 3.
     text = text.replace(/^[\s]*\d+\.\s+(.+)$/gm, '<li>$1</li>');
-
-    // Cabeçalhos (### ## #) — converte para negrito + quebra
     text = text.replace(/^#{3}\s+(.+)$/gm, '<strong class="md-h3">$1</strong>');
     text = text.replace(/^#{2}\s+(.+)$/gm, '<strong class="md-h2">$1</strong>');
     text = text.replace(/^#{1}\s+(.+)$/gm, '<strong class="md-h1">$1</strong>');
-
-    // Linha horizontal ---
     text = text.replace(/^---+$/gm, '<hr class="md-hr">');
-
-    // Quebras de linha duplas → parágrafo
     text = text.replace(/\n{2,}/g, '</p><p>');
-
-    // Quebra simples → <br> (dentro de parágrafos)
     text = text.replace(/\n/g, '<br>');
-
-    // Envolve tudo em parágrafo
     text = `<p>${text}</p>`;
-
-    // Limpa <p> vazios
     text = text.replace(/<p><\/p>/g, '');
     text = text.replace(/<p>\s*<\/p>/g, '');
-
     return text;
 }
 
 // ============================================================
-// NAVEGAÇÃO
+// NAVEGAÇÃO (original)
 // ============================================================
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -71,9 +54,14 @@ function showPage(pageId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Landing → Profile Selection
+// Landing → Login (alterado: agora vai para loginPage)
 document.getElementById('startBtn').addEventListener('click', () => {
-    showPage('profilePage');
+    showPage('loginPage');
+});
+
+// ── Botão voltar da loginPage ──────────────────────────────
+document.getElementById('backFromLogin').addEventListener('click', () => {
+    showPage('landingPage');
 });
 
 // Profile → Chat (PF)
@@ -94,7 +82,7 @@ document.getElementById('choosePJ').addEventListener('click', () => {
 
 // Voltar da seleção de perfil
 document.getElementById('backFromProfile').addEventListener('click', () => {
-    showPage('landingPage');
+    showPage('loginPage');
 });
 
 // Voltar do chat
@@ -116,11 +104,166 @@ document.getElementById('backFromResults').addEventListener('click', () => {
 });
 
 // ============================================================
-// TEMA  (tratado pelo themeCheckbox mais abaixo)
+// ★ AUTH — LOGIN / REGISTRO / ANÔNIMO
+// ============================================================
+
+/** Alterna entre as abas Login e Registro */
+function switchAuthTab(tab) {
+    const loginForm    = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const tabLogin     = document.getElementById('tabLogin');
+    const tabRegister  = document.getElementById('tabRegister');
+
+    if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        document.getElementById('loginError').textContent = '';
+    } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        tabLogin.classList.remove('active');
+        tabRegister.classList.add('active');
+        document.getElementById('registerError').textContent = '';
+    }
+}
+
+/** Faz login via API */
+async function handleLogin() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const errorEl  = document.getElementById('loginError');
+    const btn      = document.getElementById('loginSubmitBtn');
+
+    errorEl.textContent = '';
+
+    if (!email || !password) {
+        errorEl.textContent = 'Preencha email e senha.';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    try {
+        const res  = await fetch('/login', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorEl.textContent = data.error || 'Erro ao fazer login.';
+        } else {
+            currentUserId = data.user_id;
+            isAnonymous   = false;
+            _onAuthSuccess(email);
+        }
+    } catch (_) {
+        errorEl.textContent = 'Erro de conexão com o servidor.';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+    }
+}
+
+/** Cria uma conta via API */
+async function handleRegister() {
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const errorEl  = document.getElementById('registerError');
+    const btn      = document.getElementById('registerSubmitBtn');
+
+    errorEl.textContent = '';
+
+    if (!email || !password) {
+        errorEl.textContent = 'Preencha email e senha.';
+        return;
+    }
+    if (password.length < 6) {
+        errorEl.textContent = 'Senha deve ter pelo menos 6 caracteres.';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Criando conta...';
+
+    try {
+        const res  = await fetch('/register', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorEl.textContent = data.error || 'Erro ao criar conta.';
+        } else {
+            currentUserId = data.user_id;
+            isAnonymous   = false;
+            _onAuthSuccess(email);
+        }
+    } catch (_) {
+        errorEl.textContent = 'Erro de conexão com o servidor.';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Criar conta';
+    }
+}
+
+/** Prossegue sem criar conta (modo anônimo) */
+function continueAnonymous() {
+    currentUserId = null;
+    isAnonymous   = true;
+    showPage('profilePage');
+}
+
+/** Callback após login/registro com sucesso */
+function _onAuthSuccess(email) {
+    // Persiste localmente para caso de refresh (simples, protótipo)
+    sessionStorage.setItem('sb_user_id', currentUserId);
+    sessionStorage.setItem('sb_email',   email);
+
+    showPage('profilePage');
+}
+
+/** Tenta restaurar sessão de login da sessionStorage */
+function _restoreSession() {
+    const uid   = sessionStorage.getItem('sb_user_id');
+    const email = sessionStorage.getItem('sb_email');
+    if (uid) {
+        currentUserId = uid;
+        isAnonymous   = false;
+        _updateUserPill(email);
+    }
+}
+
+/** Atualiza ou remove o user pill na topbar */
+function _updateUserPill(email) {
+    // Remove pill existente se houver
+    const existingPill = document.querySelector('.user-pill');
+    if (existingPill) existingPill.remove();
+
+    if (!email) return;
+
+    const badge = document.getElementById('chatProfileBadge');
+    if (!badge) return;
+
+    const pill = document.createElement('span');
+    pill.className = 'user-pill';
+    pill.textContent = '👤 ' + email.split('@')[0];
+    pill.title = email;
+    badge.parentNode.insertBefore(pill, badge.nextSibling);
+}
+
+// ============================================================
+// TEMA  (original)
 // ============================================================
 
 // ============================================================
-// BADGE DE PERFIL
+// BADGE DE PERFIL (original)
 // ============================================================
 function setBadge(text) {
     const el = document.getElementById('chatProfileBadge');
@@ -128,7 +271,7 @@ function setBadge(text) {
 }
 
 // ============================================================
-// PROGRESSO DE ETAPAS
+// PROGRESSO DE ETAPAS (original)
 // ============================================================
 function setStep(step) {
     currentStep = step;
@@ -142,13 +285,20 @@ function setStep(step) {
 }
 
 // ============================================================
-// INICIAR CONVERSA
+// INICIAR CONVERSA (original)
 // ============================================================
 async function startConversation() {
     document.getElementById('chatBox').innerHTML = '';
     currentStep = 1;
     setStep(1);
     sessionId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+
+    // Atualiza user pill com email da sessão
+    const email = sessionStorage.getItem('sb_email');
+    if (currentUserId && email) _updateUserPill(email);
+
+    // Carrega histórico no sidebar se logado
+    if (currentUserId) loadHistory();
 
     const initMsg = userProfileType === 'pj'
         ? 'Olá! Quero fazer uma análise de crédito para minha empresa.'
@@ -158,11 +308,11 @@ async function startConversation() {
 }
 
 // ============================================================
-// ENVIAR MENSAGEM
+// ENVIAR MENSAGEM (original)
 // ============================================================
 async function sendMessage() {
     const input = document.getElementById('userInput');
-    const text = input.value.trim();
+    const text  = input.value.trim();
     if (!text) return;
     input.value = '';
     addMessage(text, 'user');
@@ -174,21 +324,17 @@ function handleKeyPress(e) {
 }
 
 // ============================================================
-// SCROLL DO CHAT — acompanha novas mensagens
+// SCROLL DO CHAT (original)
 // ============================================================
 function scrollChatToBottom(smooth = true) {
     const chatBox = document.getElementById('chatBox');
     if (!chatBox) return;
-    chatBox.scrollTo({
-        top: chatBox.scrollHeight,
-        behavior: smooth ? 'smooth' : 'instant'
-    });
-    // Fallback para browsers sem suporte a scroll options
+    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
     setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 80);
 }
 
 // ============================================================
-// COMUNICAÇÃO COM O BACKEND
+// COMUNICAÇÃO COM O BACKEND (atualizado para incluir user_id)
 // ============================================================
 async function sendToBot(userText, showUserMsg = true) {
     if (showUserMsg) addMessage(userText, 'user');
@@ -198,12 +344,13 @@ async function sendToBot(userText, showUserMsg = true) {
 
     try {
         const res = await fetch('/chat', {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: userText,
-                session_id: sessionId,
-                profile_type: userProfileType
+            body:    JSON.stringify({
+                message:      userText,
+                session_id:   sessionId,
+                profile_type: userProfileType,
+                user_id:      currentUserId || null   // ★ NOVO: envia user_id se logado
             })
         });
 
@@ -220,6 +367,9 @@ async function sendToBot(userText, showUserMsg = true) {
 
         addMessage(data.response, 'bot');
         advanceStep(data.response);
+
+        // TTS automático (se ativado)
+        if (autoSpeak) speakText(data.response);
 
         if (data.result_data) {
             setStep(4);
@@ -238,7 +388,7 @@ async function sendToBot(userText, showUserMsg = true) {
     }
 }
 
-// Heurística para avançar etapas
+// Heurística para avançar etapas (original)
 function advanceStep(botReply) {
     const r = botReply.toLowerCase();
     if (currentStep === 1 && (r.includes('renda') || r.includes('faturamento') || r.includes('salário'))) {
@@ -251,18 +401,24 @@ function advanceStep(botReply) {
 }
 
 // ============================================================
-// HELPERS DE CHAT
+// HELPERS DE CHAT (addMessage atualizado com botão TTS)
 // ============================================================
 function addMessage(text, role) {
     const chatBox = document.getElementById('chatBox');
-    const div = document.createElement('div');
+    const div     = document.createElement('div');
     div.className = `message ${role}`;
 
     if (role === 'bot') {
-        // Renderiza markdown como HTML
         div.innerHTML = parseMarkdown(text);
+
+        // ★ Botão de leitura por voz em cada mensagem do bot
+        const speakBtn = document.createElement('button');
+        speakBtn.className = 'speak-btn';
+        speakBtn.title     = 'Ouvir esta mensagem';
+        speakBtn.innerHTML = '🔊 ouvir';
+        speakBtn.onclick   = () => speakText(text);
+        div.appendChild(speakBtn);
     } else {
-        // Mensagem do usuário: texto plano, sem interpretar markdown
         div.textContent = text;
     }
 
@@ -272,7 +428,7 @@ function addMessage(text, role) {
 
 function showTyping() {
     const chatBox = document.getElementById('chatBox');
-    const id = 'typing-' + Date.now();
+    const id  = 'typing-' + Date.now();
     const div = document.createElement('div');
     div.className = 'message bot typing-indicator';
     div.id = id;
@@ -289,42 +445,291 @@ function removeTyping(id) {
 
 function setInputEnabled(enabled) {
     const input = document.getElementById('userInput');
-    const btn = document.getElementById('sendButton');
+    const btn   = document.getElementById('sendButton');
     input.disabled = !enabled;
-    btn.disabled = !enabled;
+    btn.disabled   = !enabled;
     if (enabled) input.focus();
 }
 
 // ============================================================
-// RENDERIZAR RESULTADOS
+// ★ VOZ — SPEECH-TO-TEXT (STT)
+// ============================================================
+
+/** Inicializa o SpeechRecognition da Web API */
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        console.warn('SpeechRecognition não suportado neste navegador.');
+        const micBtn = document.getElementById('micBtn');
+        if (micBtn) {
+            micBtn.title   = 'Reconhecimento de voz não suportado neste navegador';
+            micBtn.style.opacity = '0.4';
+            micBtn.style.cursor  = 'not-allowed';
+            micBtn.onclick = () => null;
+        }
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang        = 'pt-BR';
+    recognition.continuous  = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const input      = document.getElementById('userInput');
+        if (input) {
+            input.value = transcript;
+            input.focus();
+        }
+        _setMicState(false);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Erro no microfone:', event.error);
+        _setMicState(false);
+    };
+
+    recognition.onend = () => {
+        _setMicState(false);
+    };
+}
+
+/** Liga/desliga o microfone */
+function toggleMic() {
+    if (!recognition) {
+        initSpeechRecognition();
+        if (!recognition) return;
+    }
+
+    if (micActive) {
+        recognition.stop();
+        _setMicState(false);
+    } else {
+        try {
+            recognition.start();
+            _setMicState(true);
+        } catch (e) {
+            console.error('Erro ao iniciar microfone:', e);
+        }
+    }
+}
+
+function _setMicState(active) {
+    micActive = active;
+    const btn = document.getElementById('micBtn');
+    if (!btn) return;
+    btn.classList.toggle('listening', active);
+    btn.title = active ? 'Clique para parar' : 'Falar por voz';
+}
+
+// ============================================================
+// ★ VOZ — TEXT-TO-SPEECH (TTS)
+// ============================================================
+
+/** Faz o browser ler o texto em voz alta */
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+
+    // Cancela fala em andamento
+    window.speechSynthesis.cancel();
+
+    // Remove markdown e HTML antes de ler
+    const plain = text
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/\*(.+?)\*/g, '$1')
+        .replace(/<[^>]+>/g, '')
+        .replace(/#{1,3}\s/g, '')
+        .replace(/\[RESULTADO_JSON\][\s\S]*\[\/RESULTADO_JSON\]/g, '')
+        .trim();
+
+    const utterance = new SpeechSynthesisUtterance(plain);
+    utterance.lang   = 'pt-BR';
+    utterance.rate   = 1.0;
+    utterance.pitch  = 1.0;
+    utterance.volume = 1.0;
+
+    // Tenta usar voz em português se disponível
+    const voices = window.speechSynthesis.getVoices();
+    const ptVoice = voices.find(v => v.lang.startsWith('pt'));
+    if (ptVoice) utterance.voice = ptVoice;
+
+    window.speechSynthesis.speak(utterance);
+}
+
+/** Liga/desliga TTS automático para novas mensagens do bot */
+function toggleAutoSpeak() {
+    autoSpeak = !autoSpeak;
+    const btn  = document.getElementById('ttsToggleBtn');
+    const x1   = document.getElementById('ttsX1');
+    const x2   = document.getElementById('ttsX2');
+
+    if (btn)  btn.classList.toggle('active', autoSpeak);
+    if (autoSpeak) {
+        // Mostra ícone de som ativo (sem o X)
+        if (x1) x1.setAttribute('d', 'M15.54 8.46a5 5 0 0 1 0 7.07');
+        if (x2) x2.setAttribute('d', 'M19.07 4.93a10 10 0 0 1 0 14.14');
+        if (x1) x1.removeAttribute('x1');
+        if (x2) x2.removeAttribute('x1');
+        btn.title = 'Desativar leitura automática';
+    } else {
+        // Mostra ícone mudo (com X)
+        if (x1) { x1.setAttribute('x1','23'); x1.setAttribute('y1','9'); x1.setAttribute('x2','17'); x1.setAttribute('y2','15'); }
+        if (x2) { x2.setAttribute('x1','17'); x2.setAttribute('y1','9'); x2.setAttribute('x2','23'); x2.setAttribute('y2','15'); }
+        btn.title = 'Ativar leitura automática';
+        window.speechSynthesis && window.speechSynthesis.cancel();
+    }
+}
+
+// ============================================================
+// ★ HISTÓRICO DE CHATS
+// ============================================================
+
+/** Abre/fecha o sidebar de histórico */
+function toggleSidebar() {
+    const sidebar = document.getElementById('historySidebar');
+    const overlay = document.getElementById('historyOverlay');
+
+    const isOpen = sidebar.classList.toggle('open');
+    overlay.classList.toggle('hidden', !isOpen);
+
+    if (isOpen && currentUserId) {
+        loadHistory();
+    } else if (isOpen && !currentUserId) {
+        document.getElementById('historyList').innerHTML =
+            '<p class="hs-login-note">Faça login para salvar e ver o histórico de análises.</p>';
+    }
+}
+
+/** Busca histórico da API e renderiza no sidebar */
+async function loadHistory() {
+    if (!currentUserId) return;
+
+    const list = document.getElementById('historyList');
+    list.innerHTML = '<p class="hs-login-note">Carregando...</p>';
+
+    try {
+        const res  = await fetch(`/history?user_id=${currentUserId}`);
+        const data = await res.json();
+        renderHistory(data.chats || []);
+    } catch (_) {
+        list.innerHTML = '<p class="hs-login-note">Erro ao carregar histórico.</p>';
+    }
+}
+
+/** Renderiza a lista de chats no sidebar */
+function renderHistory(chats) {
+    const list = document.getElementById('historyList');
+
+    if (!chats.length) {
+        list.innerHTML = '<p class="hs-login-note">Nenhuma análise salva ainda.<br>Faça uma análise para vê-la aqui.</p>';
+        return;
+    }
+
+    list.innerHTML = '';
+    chats.forEach(chat => {
+        const item = document.createElement('div');
+        item.className = 'hs-item';
+
+        const date    = new Date(chat.created_at * 1000);
+        const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+        const type    = chat.profile_type === 'pj' ? '🏢 Empresa' : '👤 Pessoal';
+
+        item.innerHTML = `
+            <div class="hs-item-title">${type}</div>
+            <div class="hs-item-meta">${dateStr} · ${chat.message_count} mensagens</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+// ============================================================
+// ★ MEMÓRIA PERSONALIZADA
+// ============================================================
+
+/** Abre o modal de salvar memória */
+function openMemoryModal() {
+    const modal   = document.getElementById('memoryModal');
+    const errorEl = document.getElementById('memError');
+    document.getElementById('memKey').value   = '';
+    document.getElementById('memValue').value = '';
+    if (errorEl) errorEl.textContent = '';
+    modal.classList.remove('hidden');
+    setTimeout(() => document.getElementById('memKey').focus(), 100);
+}
+
+/** Fecha o modal de memória */
+function closeMemoryModal() {
+    document.getElementById('memoryModal').classList.add('hidden');
+}
+
+/** Salva uma entrada de memória via API */
+async function saveMemoryEntry() {
+    const key     = document.getElementById('memKey').value.trim();
+    const value   = document.getElementById('memValue').value.trim();
+    const errorEl = document.getElementById('memError');
+
+    if (errorEl) errorEl.textContent = '';
+
+    if (!key || !value) {
+        if (errorEl) errorEl.textContent = 'Preencha tipo e valor.';
+        return;
+    }
+
+    if (!currentUserId) {
+        if (errorEl) errorEl.textContent = 'Faça login para salvar na memória.';
+        return;
+    }
+
+    try {
+        const res  = await fetch('/memory', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ user_id: currentUserId, key, value })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            closeMemoryModal();
+            // Feedback visual — mensagem temporária no chat
+            addMessage(`✅ Informação salva na memória: "${key}: ${value}". Será usada nas próximas análises!`, 'bot');
+        } else {
+            if (errorEl) errorEl.textContent = data.error || 'Erro ao salvar.';
+        }
+    } catch (_) {
+        if (errorEl) errorEl.textContent = 'Erro de conexão.';
+    }
+}
+
+// ============================================================
+// RENDERIZAR RESULTADOS (original)
 // ============================================================
 function renderResults(d) {
-    document.getElementById('res-nome').textContent = d.nome || 'Usuário';
+    document.getElementById('res-nome').textContent    = d.nome    || 'Usuário';
     document.getElementById('res-score-num').textContent = d.score || '—';
 
     const tierEl = document.getElementById('res-tier');
-    tierEl.textContent = d.tier || '—';
-    tierEl.style.color = scoreTierColor(d.score);
+    tierEl.textContent  = d.tier || '—';
+    tierEl.style.color  = scoreTierColor(d.score);
 
-    document.getElementById('res-renda').textContent = d.renda || '—';
-    document.getElementById('res-perfil').textContent = d.perfil || '—';
+    document.getElementById('res-renda').textContent   = d.renda   || '—';
+    document.getElementById('res-perfil').textContent  = d.perfil  || '—';
     document.getElementById('res-objetivo').textContent = d.objetivo || '—';
-    document.getElementById('res-limite').textContent = d.limite || '—';
+    document.getElementById('res-limite').textContent  = d.limite  || '—';
 
     const tag = document.getElementById('resProfileTag');
-    if (tag) {
-        tag.textContent = userProfileType === 'pj' ? 'PJ' : 'PF';
-    }
+    if (tag) tag.textContent = userProfileType === 'pj' ? 'PJ' : 'PF';
 
     animateScoreArc(d.score || 0);
     renderSugestoes(d.sugestoes || []);
 }
 
 function animateScoreArc(score) {
-    const arc = document.getElementById('score-arc-fill');
+    const arc           = document.getElementById('score-arc-fill');
     const circumference = 2 * Math.PI * 54;
-    const pct = Math.min(Math.max(score / 1000, 0), 1);
-    arc.style.stroke = scoreTierColor(score);
+    const pct           = Math.min(Math.max(score / 1000, 0), 1);
+    arc.style.stroke    = scoreTierColor(score);
     setTimeout(() => {
         arc.style.strokeDasharray = `${pct * circumference} ${circumference}`;
     }, 400);
@@ -356,7 +761,6 @@ function renderSugestoes(sugestoes) {
     });
 }
 
-// Converte emojis comuns de sugestão em SVGs minimalistas
 function getSugIcon(emoji) {
     const map = {
         '💳': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
@@ -371,65 +775,78 @@ function getSugIcon(emoji) {
 }
 
 // ============================================================
-// RESET
+// RESET (original + limpa estados de voz/auth)
 // ============================================================
 async function resetSession() {
     if (sessionId) {
         try {
             await fetch('/reset', {
-                method: 'POST',
+                method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: sessionId })
+                body:    JSON.stringify({ session_id: sessionId })
             });
         } catch (_) {}
     }
-    sessionId = null;
+    sessionId       = null;
     userProfileType = null;
-    currentStep = 1;
-    document.getElementById('chatBox').innerHTML = '';
+    currentStep     = 1;
+    document.getElementById('chatBox').innerHTML            = '';
     document.getElementById('chatProfileBadge').textContent = '';
     setStep(1);
+
+    // Para TTS em andamento
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+    // Para microfone se ativo
+    if (micActive && recognition) {
+        recognition.stop();
+        _setMicState(false);
+    }
+
+    // Fecha sidebar se aberto
+    const sidebar = document.getElementById('historySidebar');
+    const overlay = document.getElementById('historyOverlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.add('hidden');
+
+    // Remove user pill
+    document.querySelectorAll('.user-pill').forEach(el => el.remove());
 }
 
 // ============================================================
-// LÓGICA DE TEMA (BOTÃO SLIDER)
+// LÓGICA DE TEMA (original)
 // ============================================================
 const themeCheckbox = document.getElementById('themeCheckbox');
 if (themeCheckbox) {
-    // Sincroniza o botão com o tema atual logo que a página carrega
     const currentTheme = document.documentElement.getAttribute('data-theme');
     themeCheckbox.checked = (currentTheme === 'light');
 
     themeCheckbox.addEventListener('change', function() {
         const html = document.documentElement;
-        if (this.checked) {
-            html.setAttribute('data-theme', 'light');
-        } else {
-            html.setAttribute('data-theme', 'dark');
-        }
+        if (this.checked) { html.setAttribute('data-theme', 'light'); }
+        else              { html.setAttribute('data-theme', 'dark');  }
     });
 }
 
 // ============================================================
-// ANIMAÇÕES DE SCROLL (FADE-IN / FADE-OUT E PARALLAX)
+// ANIMAÇÕES DE SCROLL / LOADING / PARALLAX (original)
 // ============================================================
 document.addEventListener("DOMContentLoaded", () => {
-    // ── ESCONDE O LOADING SCREEN ──────────────────────────────
+    // Restaura sessão de login
+    _restoreSession();
+
+    // Inicializa SpeechRecognition
+    initSpeechRecognition();
+
+    // ── ESCONDE O LOADING SCREEN ──
     const loadingScreen = document.getElementById('loadingScreen');
     if (loadingScreen) {
-        // Aguarda no mínimo 1.2s para o efeito ficar suave, depois remove
-        setTimeout(() => {
-            loadingScreen.classList.add('fade-out');
-        }, 1200);
+        setTimeout(() => { loadingScreen.classList.add('fade-out'); }, 1200);
     }
 
-    // 1. Intersection Observer para Fade In / Fade Out
+    // Intersection Observer para Fade In / Fade Out
     const revealElements = document.querySelectorAll('.reveal-item');
-    
-    const revealOptions = {
-        threshold: 0.15, // 15% do elemento precisa estar na tela
-        rootMargin: "0px 0px -50px 0px"
-    };
+    const revealOptions  = { threshold: 0.15, rootMargin: "0px 0px -50px 0px" };
 
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -437,7 +854,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 entry.target.classList.add('visible');
                 entry.target.classList.remove('hidden-scroll');
             } else {
-                // Ao rolar pra fora, removemos para criar efeito de fade-out
                 entry.target.classList.remove('visible');
                 entry.target.classList.add('hidden-scroll');
             }
@@ -446,22 +862,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     revealElements.forEach(el => revealObserver.observe(el));
 
-    // 2. Animação de Parallax via Scroll
+    // Animação de Parallax via Scroll
     const parallaxElements = document.querySelectorAll('.parallax-item');
-    
     window.addEventListener('scroll', () => {
         let scrollY = window.scrollY;
-        
         parallaxElements.forEach(el => {
-            // Se o usuário adicionou um data-speed, usamos ele. Padrão = 0.3
             let speed = el.getAttribute('data-speed') || 0.3;
             el.style.transform = `translateY(${scrollY * speed}px)`;
         });
     });
-
-    // ============================================================
-    // CÓDIGO EXTRAÍDO DO HTML (Partículas do Fundo e JS residual)
-    // (Cole aqui o script das partículas (particles.forEach...) e do Canvas 
-    // que estava originalmente na tag <script> do index.html)
-    // ============================================================
 });
