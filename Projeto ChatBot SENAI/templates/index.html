@@ -349,6 +349,24 @@
             font-family: 'DM Sans', sans-serif;
         }
 
+        /* ── ICON STYLING ────────────────────────────────────── */
+        .hs-icon,
+        .mm-icon,
+        .hs-item-title svg {
+            display: inline-block;
+            margin-right: 0.35rem;
+            color: rgba(255,255,255,0.6);
+            vertical-align: middle;
+        }
+        .hs-header h3 .hs-icon {
+            margin-right: 0.5rem;
+            color: var(--primary, #f6e033);
+        }
+        .mm-content h3 .mm-icon {
+            margin-right: 0.5rem;
+            color: var(--primary, #f6e033);
+        }
+
         .history-overlay {
             position: fixed;
             inset: 0;
@@ -431,6 +449,375 @@
         [data-theme="light"] .topbar-action-btn { color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.03); }
         [data-theme="light"] .mic-btn { color: rgba(0,0,0,0.5); border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.03); }
         [data-theme="light"] .speak-btn { color: rgba(0,0,0,0.25); }
+
+        /* ── RESPONSIVIDADE ──────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .hero-section {
+                gap: 28px;
+                padding: 60px 32px 50px;
+            }
+            .mascote-wrap {
+                width: 200px;
+                height: 200px;
+            }
+            .landing-robot-img {
+                width: 160px;
+            }
+            .ring-1 {
+                width: 190px;
+                height: 190px;
+            }
+            .ring-2 {
+                width: 160px;
+                height: 160px;
+            }
+            .benefits-section {
+                padding: 20px 32px 50px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                flex-direction: column;
+                gap: 20px;
+                padding: 40px 20px 30px;
+            }
+            .hero-left {
+                max-width: 100%;
+            }
+            .landing-title {
+                font-size: clamp(1.8rem, 5vw, 2.5rem);
+            }
+            .landing-subtitle {
+                font-size: 0.95rem;
+            }
+            .hero-right {
+                width: 100%;
+                justify-content: center;
+            }
+            .mascote-wrap {
+                width: 180px;
+                height: 180px;
+            }
+            .landing-robot-img {
+                width: 140px;
+            }
+            .ring-1 {
+                width: 170px;
+                height: 170px;
+            }
+            .ring-2 {
+                width: 140px;
+                height: 140px;
+            }
+            .benefits-section {
+                padding: 20px 20px 40px;
+            }
+            .benefit-card {
+                padding: 1.2rem;
+            }
+            .login-wrapper {
+                padding: 1.5rem 1rem;
+            }
+            .profile-wrapper {
+                padding: 1.5rem 1rem;
+            }
+            .profile-cards {
+                gap: 1rem;
+            }
+            .profile-card {
+                padding: 1.2rem;
+            }
+            .history-sidebar {
+                width: 220px;
+            }
+            .chat-topbar {
+                padding: 0.7rem 0.8rem;
+            }
+            .chat-topbar-brand {
+                gap: 0.5rem;
+            }
+            .topbar-name {
+                font-size: 0.85rem;
+            }
+            .topbar-status {
+                font-size: 0.7rem;
+            }
+            .chat-topbar-actions {
+                gap: 0.3rem;
+            }
+            .topbar-action-btn {
+                width: 28px;
+                height: 28px;
+            }
+            .mic-btn {
+                width: 36px;
+                height: 36px;
+            }
+            .progress-steps {
+                gap: 0.3rem;
+            }
+            .ps-step {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.6rem;
+            }
+            .chat-input-area {
+                gap: 0.6rem;
+            }
+            #userInput {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 30px 16px 20px;
+            }
+            .landing-title {
+                font-size: clamp(1.4rem, 5vw, 2rem);
+                line-height: 1.1;
+            }
+            .landing-subtitle {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+            .landing-badge {
+                font-size: 0.7rem;
+                padding: 5px 12px;
+            }
+            .landing-cta {
+                padding: 14px 24px;
+                font-size: 0.9rem;
+            }
+            .social-proof {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .hero-right {
+                display: none;
+            }
+            .benefits-section {
+                padding: 20px 16px 30px;
+            }
+            .benefits-grid {
+                gap: 1rem;
+            }
+            .benefit-card {
+                padding: 0.95rem;
+            }
+            .bc-icon {
+                width: 32px;
+                height: 32px;
+            }
+            .section-divider {
+                padding: 15px 16px;
+            }
+            .video-section-title {
+                font-size: 1.4rem;
+            }
+            .login-wrapper {
+                padding: 1rem 0.75rem;
+                gap: 0.7rem;
+            }
+            .login-field {
+                gap: 0.25rem;
+            }
+            .login-field input {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            .login-btn {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+            .profile-wrapper {
+                padding: 1rem 0.75rem;
+            }
+            .profile-header h2 {
+                font-size: 1.3rem;
+            }
+            .profile-cards {
+                gap: 0.8rem;
+            }
+            .profile-card {
+                padding: 1rem;
+            }
+            .pc-body h3 {
+                font-size: 0.95rem;
+            }
+            .history-sidebar {
+                width: 100%;
+                border-radius: 0;
+            }
+            .hs-header {
+                padding: 0.9rem 0.8rem;
+            }
+            .hs-header h3 {
+                font-size: 0.9rem;
+            }
+            .hs-body {
+                padding: 0.5rem;
+            }
+            .main-wrapper {
+                border-radius: 0;
+            }
+            .chat-topbar {
+                padding: 0.6rem 0.6rem;
+                gap: 0.4rem;
+                flex-wrap: wrap;
+            }
+            .topbar-robot {
+                width: 24px;
+                height: 24px;
+            }
+            .topbar-name {
+                font-size: 0.8rem;
+            }
+            .topbar-status {
+                font-size: 0.65rem;
+            }
+            .chat-topbar-actions {
+                gap: 0.25rem;
+            }
+            .topbar-action-btn {
+                width: 26px;
+                height: 26px;
+            }
+            .progress-steps {
+                gap: 0.2rem;
+                padding: 0.5rem;
+            }
+            .ps-step {
+                font-size: 0.65rem;
+                padding: 0.35rem 0.5rem;
+            }
+            .ps-divider {
+                width: 1px;
+            }
+            .chat-container {
+                padding: 1rem 0.75rem;
+            }
+            .chat-box {
+                gap: 0.6rem;
+            }
+            .msg {
+                max-width: 95%;
+                padding: 0.65rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            .msg-user {
+                border-radius: 12px 2px 12px 12px;
+            }
+            .msg-bot {
+                border-radius: 2px 12px 12px 12px;
+            }
+            .msg-typing {
+                width: 40px;
+                height: 20px;
+            }
+            .chat-input-area {
+                gap: 0.5rem;
+                padding: 0.6rem;
+            }
+            .mic-btn {
+                width: 34px;
+                height: 34px;
+            }
+            #userInput {
+                padding: 0.55rem 0.7rem;
+                font-size: 0.85rem;
+            }
+            #sendButton {
+                padding: 0.55rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            .results-wrapper {
+                padding: 1rem 0.75rem;
+            }
+            .results-header {
+                gap: 0.8rem;
+                padding: 1rem;
+            }
+            .res-robot {
+                width: 40px;
+                height: 40px;
+            }
+            .score-card {
+                padding: 1rem;
+            }
+            .score-arc-wrap {
+                width: 100px;
+                height: 100px;
+            }
+            .score-num {
+                font-size: 1.5rem;
+            }
+            .score-info {
+                gap: 0.5rem;
+            }
+            .score-tier {
+                font-size: 1rem;
+            }
+            .score-desc {
+                font-size: 0.8rem;
+            }
+            .limite-card {
+                padding: 0.9rem;
+            }
+            .limite-valor {
+                font-size: 1.3rem;
+            }
+            .sugestoes-grid {
+                gap: 0.8rem;
+            }
+            .sug-card {
+                padding: 0.8rem;
+            }
+            .results-actions {
+                gap: 0.6rem;
+            }
+            .btn-nova,
+            .btn-inicio {
+                padding: 0.65rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            .mm-content {
+                width: 95%;
+                max-width: 300px;
+                padding: 1.2rem;
+            }
+            .testi-grid {
+                grid-template-columns: 1fr;
+            }
+            .ai-pillars-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .landing-title {
+                font-size: 1.2rem;
+            }
+            .landing-subtitle {
+                font-size: 0.85rem;
+            }
+            .landing-cta {
+                padding: 12px 16px;
+                font-size: 0.8rem;
+            }
+            .login-wrapper {
+                padding: 0.8rem 0.5rem;
+            }
+            .login-tabs {
+                max-width: 100%;
+            }
+            .login-field input {
+                padding: 0.5rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 
@@ -646,11 +1033,16 @@
 
             <div class="video-frame-wrap fadeInUp" data-speed="0.2">
                 <div class="video-glow-border fadeIn"></div>
-                <iframe src="https://www.youtube.com/embed/slbS2jkCYDM?si=soIheywI39P8Kq21"
-                    title="ScoreBot — Demonstração"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-                </iframe>
+                <video
+                    src="/static/video/Demo ScoreBot.mp4"
+                    controls
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    style="width:100%;height:100%;border-radius:inherit;object-fit:cover;">
+                    Seu navegador não suporta a tag de vídeo.
+                </video>
             </div>
 
             <div class="video-badge-row reveal-item">
@@ -888,8 +1280,8 @@
         <!-- ★ HISTORY SIDEBAR (NOVO) -->
         <div class="history-sidebar" id="historySidebar">
             <div class="hs-header">
-                <h3>📋 Histórico</h3>
-                <button class="hs-close-btn" onclick="toggleSidebar()" title="Fechar">✕</button>
+                <h3><svg class="hs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M8 2H16V4H8Z"/><path d="M18 4H20A2 2 0 0 1 22 6V20A2 2 0 0 1 20 22H4A2 2 0 0 1 2 20V6A2 2 0 0 1 4 4H6V2H8V4H16V2H18V4Z"/><path d="M6 10H18V18H6Z"/></svg> Histórico</h3>
+                <button class="hs-close-btn" onclick="toggleSidebar()" title="Fechar">×</button>
             </div>
             <div class="hs-body" id="historyList">
                 <p class="hs-login-note">Faça login para ver seu histórico de análises aqui.</p>
@@ -974,7 +1366,7 @@
     <div class="memory-modal-wrap hidden" id="memoryModal">
         <div class="memory-modal-overlay" onclick="closeMemoryModal()"></div>
         <div class="mm-content">
-            <h3>💾 Salvar na memória</h3>
+            <h3><svg class="mm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar na memória</h3>
             <p class="mm-sub">A IA usará essa info nas próximas análises</p>
             <div class="login-field">
                 <label>Tipo de informação</label>

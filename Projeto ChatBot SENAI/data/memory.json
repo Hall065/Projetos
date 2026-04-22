@@ -1,3 +1,14 @@
 {
-  "memory": []
+  "memory": [
+    {
+      "user_id": "671f7f52-52f0-431d-9dac-d1b0777b4511",
+      "key": "renda",
+      "value": "AUdPR1VyXw=="
+    },
+    {
+      "user_id": "abaad0f3-8cc4-4b51-aa05-5108d5c98d5f",
+      "key": "profiss",
+      "value": "Ng0IFwsqCh1AXw=="
+    }
+  ]
 }

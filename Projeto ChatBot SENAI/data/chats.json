@@ -1,3 +1,52 @@
 {
-  "chats": []
+  "chats": [
+    {
+      "chat_id": "a32e3500-2b6d-44b9-992e-a7d010290826",
+      "user_id": "671f7f52-52f0-431d-9dac-d1b0777b4511",
+      "profile_type": "pf",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Olá, meu nome é Teste"
+        },
+        {
+          "role": "assistant",
+          "content": "Olá, Teste! 😊 \n\nQue bom te conhecer! Vou te ajudar a entender melhor seu score de crédito e situação financeira. \n\nPara começar, preciso saber sua **renda mensal líquida** (o valor que realmente cai na sua conta após descontos). Quanto você recebe por mês? 💰"
+        }
+      ],
+      "created_at": 1776893790
+    },
+    {
+      "chat_id": "952829b7-bf3c-4cb4-a23b-f8676802cfaf",
+      "user_id": "abaad0f3-8cc4-4b51-aa05-5108d5c98d5f",
+      "profile_type": "pf",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Olá! Quero fazer uma análise de crédito pessoal."
+        },
+        {
+          "role": "assistant",
+          "content": "Olá! 😊 Fico feliz em ajudar você com sua análise de crédito pessoal!\n\nPara começar, **qual é o seu nome completo?**"
+        }
+      ],
+      "created_at": 1776894762
+    },
+    {
+      "chat_id": "af0497c9-55e0-48db-8847-505518e7cc00",
+      "user_id": "a7e20aa4-4618-4abb-aa3c-18bd4bcae06d",
+      "profile_type": "pf",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Olá! Quero fazer uma análise de crédito pessoal."
+        },
+        {
+          "role": "assistant",
+          "content": "Olá! 😊 Fico feliz em ajudar com sua análise de crédito!\n\nVamos começar pelo primeiro passo: **qual é o seu nome completo?**"
+        }
+      ],
+      "created_at": 1776895452
+    }
+  ]
 }

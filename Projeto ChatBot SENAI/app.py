@@ -208,7 +208,7 @@ def register():
 
     return jsonify({
         'user_id': new_user['id'],
-        'message': 'Conta criada com sucesso! 🎉'
+        'message': 'Conta criada com sucesso!'
     })
 
 
@@ -226,7 +226,7 @@ def login():
         if decrypt(u.get('email', '')) == email and u['password'] == hash_password(password):
             return jsonify({
                 'user_id': u['id'],
-                'message': 'Login realizado! Bem-vindo de volta 👋'
+                'message': 'Login realizado! Bem-vindo de volta.'
             })
 
     return jsonify({'error': 'Email ou senha incorretos'}), 401
